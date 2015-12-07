@@ -2,6 +2,12 @@
 var express    = require('express');        // call express
 var app        = express();                 // define our app using express
 var bodyParser = require('body-parser');
+var mongoose   = require('mongoose');
+
+// Module for Booking Model
+var bookingRoute = require('./app/routes/bookings')
+
+mongoose.connect('mongodb://admin:1qaz.2wsx.@ds039421.mongolab.com:39421/kinetica');
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -14,6 +20,14 @@ var port = process.env.PORT || 8080;        // set our port
 // =============================================================================
 var router = express.Router();              // get an instance of the express Router
 
+// middleware to use for all requests
+router.use(function(req, res, next) {
+    // do logging
+    console.log('A request has been done');
+    next(); // make sure we go to the next routes and don't stop here
+});
+
+
 // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
 router.get('/', function(req, res) {
     res.json({ message: 'hooray! welcome to our api!' });   
@@ -23,7 +37,7 @@ router.get('/', function(req, res) {
 
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
-app.use('/api', router);
+app.use('/api', bookingRoute);
 
 // START THE SERVER
 // =============================================================================
