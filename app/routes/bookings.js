@@ -115,6 +115,7 @@ var routers = {
 
     var id = req.params.id;
 
+    /*
     // use our booking model to find the booking we want
     Booking.findById(id, function(err, booking) {
 
@@ -132,7 +133,13 @@ var routers = {
         });
 
     });
+    */
 
+    Booking.update({ _id: id }, { $set: { name: req.body.name }}, function(err){
+        if (err){res.send(err);}
+
+        res.json({ message: 'Booking updated!' });
+    });
 
 
   },
