@@ -2,7 +2,7 @@ var jwt = require('jwt-simple');
 var bcrypt = require('bcrypt');
 var secret = require('../config/secret');
 
-var User = require('../models/booking');
+var User = require('../models/user');
 
 var auth = {
  
@@ -10,7 +10,9 @@ var auth = {
  
     var username = req.body.username || '';
     var password = req.body.password || '';
- 
+
+
+    // If user or password, credentials error
     if (username == '' || password == '') {
       res.status(401);
       res.json({
@@ -19,26 +21,43 @@ var auth = {
       });
       return;
     }
- 
-    // Fire a query to your DB and check if the credentials are valid
-    var dbUserObj = auth.validate(username, password);
-   
-    if (!dbUserObj) { // If authentication fails, we send a 401 back
-      res.status(401);
-      res.json({
-        "status": 401,
-        "message": "Invalid credentials"
+
+    // First find the user
+    User.findOne({username: req.body.username})
+      .select('password').select('username')
+      .exec(function (err, user) {
+          if (err) { return next(err); }
+
+          if (!user) { 
+            res.status(401);
+            res.json({
+              "status": 401,
+              "message": "Invalid credentials"
+            });
+            return; 
+          }
+
+          // Decrypt and compare the user password
+          bcrypt.compare(password, user.password, function (err, valid) {
+           
+             if (err) { return next(err); }
+             
+             if (!valid) { 
+                res.status(401);
+                res.json({
+                  "status": 401,
+                  "message": "Invalid credentials"
+                });
+                return;
+             }
+             
+             //var token = jwt.encode({username: user.username}, secret());
+             var token = generateToken(user);
+
+             res.status(200).send(token);
+          });
       });
-      return;
-    }
- 
-    if (dbUserObj) {
- 
-      // If authentication is success, we will generate a token
-      // and dispatch it to the client
- 
-      res.json(genToken(dbUserObj));
-    }
+
  
   },
 
@@ -69,31 +88,25 @@ var auth = {
 
   },
  
-  validate: function(username, password) {
-    // spoofing the DB response for simplicity
-    var dbUserObj = { // spoofing a userobject from the DB. 
-      name: 'arvind',
-      role: 'admin',
-      username: 'arvind@myapp.com'
-    };
- 
-    return dbUserObj;
-  },
- 
   validateUser: function(username) {
-    // spoofing the DB response for simplicity
-    var dbUserObj = { // spoofing a userobject from the DB. 
-      name: 'arvind',
-      role: 'admin',
-      username: 'arvind@myapp.com'
-    };
- 
-    return dbUserObj;
+
+    User.findOne({username: username})
+      .select('username')
+      .exec(function (err, user) {
+          if (err) { return null; }
+
+          return user;
+        });
+
+
+
+
+
   },
 };
  
 // private method
-function genToken(user) {
+function generateToken(user) {
   var expires = expiresIn(7); // 7 days
   var token = jwt.encode({
     exp: expires
