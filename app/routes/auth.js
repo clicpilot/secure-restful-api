@@ -1,7 +1,9 @@
 var jwt = require('jwt-simple');
 var bcrypt = require('bcrypt');
 var secret = require('../config/secret');
- 
+
+var User = require('../models/booking');
+
 var auth = {
  
   login: function(req, res) {
@@ -40,6 +42,32 @@ var auth = {
  
   },
 
+
+  register: function(req, res){
+    var username = req.body.username || '';
+    var password = req.body.password || '';
+    var role = req.body.role || '';
+
+    var user = new User();
+
+    user.username = username;
+    user.role = role;
+    
+
+    bcrypt.hash(req.body.password, 10, function (err, hash) {
+      user.password = hash;
+      user.save(function(err,user) {
+
+        if(err) { return(next(err)); }
+
+
+        res.status(201).send();
+        //res.json(user);
+
+      });
+     });
+
+  },
  
   validate: function(username, password) {
     // spoofing the DB response for simplicity
