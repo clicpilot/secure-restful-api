@@ -1,9 +1,9 @@
-var express = require('express');
-var router = express.Router();
+//var express = require('express');
+//var router = express.Router();
 
 var Booking     = require('../models/booking');
 
-
+/*
 router.route('/bookings')
     // get all the bookings (accessed at GET http://localhost:8080/api/bookings)
     .get(function(req, res) {
@@ -31,7 +31,7 @@ router.route('/bookings')
     });
 
 
-router.route('/bookings/:booking_id')    
+router.route('/booking/:booking_id')    
     // get the booking with that id (accessed at GET http://localhost:8080/api/bookings/:booking_id)
     .get(function(req, res) {
         Booking.findById(req.params.booking_id, function(err, booking) {
@@ -73,6 +73,91 @@ router.route('/bookings/:booking_id')
             res.json({ message: 'Successfully deleted' });
         });
     });
+*/
+
+var routers = {
+ 
+  getAll: function(req, res) {
+    Booking.find(function(err, bookings) {
+            if (err)
+                res.send(err);
+
+            res.json(bookings);
+        });
+  },
+ 
+  getOne: function(req, res) {
+    var id = req.params.id;
+
+    Booking.findById(id, function(err, booking) {
+            if (err)
+                res.send(err);
+
+            res.json(booking);
+        });
+  },
+ 
+  create: function(req, res) {
+
+    var booking = new Booking();      // create a new instance of the Booking model
+    booking.name = req.body.name;  // set the bookings name (comes from the request)
+
+    // save the booking and check for errors
+    booking.save(function(err) {
+    if (err)
+        res.send(err);
+        res.json({ message: 'Booking is created!' });
+    });
+
+  },
+ 
+  update: function(req, res) {
+
+    var id = req.params.id;
+
+    /*
+    // use our booking model to find the booking we want
+    Booking.findById(id, function(err, booking) {
+
+        if (err)
+            res.send(err);
+
+        booking.name = req.body.name;  // update the bookings info
+
+        // save the booking
+        booking.save(function(err) {
+            if (err)
+                res.send(err);
+
+            res.json({ message: 'Booking updated!' });
+        });
+
+    });
+    */
+
+    Booking.update({ _id: id }, { $set: { name: req.body.name }}, function(err){
+        if (err){res.send(err);}
+
+        res.json({ message: 'Booking updated!' });
+    });
 
 
-module.exports = router;
+  },
+ 
+  delete: function(req, res) {
+    var id = req.params.id;
+
+    Booking.remove({
+        _id: id
+    }, function(err, booking) {
+        if (err)
+            res.send(err);
+
+        res.json({ message: 'Successfully deleted' });
+    });
+
+  }
+};
+
+
+module.exports = routers;
