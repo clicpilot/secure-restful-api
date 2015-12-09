@@ -42,9 +42,7 @@ app.use('/', require('./app/routes'));
  
 // If no route is matched by now, it must be a 404
 app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+  res.status(404).sendFile(require('path').join(__dirname, 'static/404.html'));
 });
 
 
@@ -61,14 +59,13 @@ router.use(function(req, res, next) {
     console.log('A request has been done');
     next(); // make sure we go to the next routes and don't stop here
 });
-*/
+
 
 // test route to make sure everything is working (accessed at GET http://localhost:8080/)
 router.get('/', function(req, res) {
     res.json({ message: 'Welcome to our secure api' });
 });
-
-
+*/
 
 // START THE SERVER
 // =============================================================================
