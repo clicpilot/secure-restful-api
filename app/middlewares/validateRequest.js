@@ -55,18 +55,24 @@ module.exports = function(req, res, next) {
 
  
     } catch (err) {
+      /*
       res.status(500);
       res.json({
         "status": 500,
         "message": "Oops something went wrong",
         "error": err
       });
+      */
+
+      res.status(500).sendFile(require('path').join(__dirname, 'static/500.html'));
+
+
     }
   } else {
     res.status(401);
     res.json({
       "status": 401,
-      "message": "Invalid Token or Key"
+      "message": "Bad Authentication data"
     });
     return;
   }
