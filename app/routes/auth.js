@@ -54,7 +54,8 @@ var auth = {
              //var token = jwt.encode({username: user.username}, secret());
              var token = generateToken(user.username);
 
-             res.status(200).send(token);
+              // Send OK
+              res.status(200).send(token);
           });
       });
 
@@ -82,7 +83,6 @@ var auth = {
 
         res.status(201).send();
         //res.json(user);
-
       });
      });
 
@@ -106,26 +106,28 @@ var auth = {
   },
 };
  
-// private method
+// This method generates JWT string using username
 function generateToken(username) {
-  var expires = expiresIn(7); // 7 days
+    var expires = expiresIn(7); // 7 days
 
-    // Put username into encoded string
-  var token = jwt.encode({
-    exp: expires,
-    username: username
-  }, secret());
+    // Put username into encoded string, not password
+    var token = jwt.encode({
+        //iss: user.id - //issuer
+        exp: expires,
+        username: username
+    }, secret());
 
-  return {
-    token: token,
-    expires: expires,
-    username: username
-  };
+    // return token, expiration date and username
+    return {
+        token: token,
+        expires: expires,
+        username: username
+    };
 }
  
 function expiresIn(numDays) {
-  var dateObj = new Date();
-  return dateObj.setDate(dateObj.getDate() + numDays);
+    var dateObj = new Date();
+    return dateObj.setDate(dateObj.getDate() + numDays);
 }
  
 module.exports = auth;
