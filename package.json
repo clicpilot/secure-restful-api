@@ -1,6 +1,6 @@
 {
   "name": "secureapi",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "This is a template project for secure RESTful API",
   "main": "server.js",
   "scripts": {

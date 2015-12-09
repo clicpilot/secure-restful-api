@@ -52,7 +52,7 @@ var auth = {
              }
              
              //var token = jwt.encode({username: user.username}, secret());
-             var token = generateToken(user);
+             var token = generateToken(user.username);
 
              res.status(200).send(token);
           });
@@ -88,34 +88,38 @@ var auth = {
 
   },
  
-  validateUser: function(username) {
+  validateUser: function(username, callback) {
 
-    User.findOne({username: username})
-      .select('username')
-      .exec(function (err, user) {
-          if (err) { return null; }
+      process.nextTick(function(){
+          User.findOne({username: username})
+              .select('username')
+              .exec(function (err, user) {
 
-          return user;
-        });
+                  callback(err, user);
+                  //if (err) { return null; }
 
-
-
+                  //return user;
+              });
+      });
 
 
   },
 };
  
 // private method
-function generateToken(user) {
+function generateToken(username) {
   var expires = expiresIn(7); // 7 days
+
+    // Put username into encoded string
   var token = jwt.encode({
-    exp: expires
+    exp: expires,
+    username: username
   }, secret());
- 
+
   return {
     token: token,
     expires: expires,
-    user: user
+    username: username
   };
 }
  
