@@ -4,17 +4,15 @@ var app        = express();                 // define our app using express
 var bodyParser = require('body-parser');
 var logger = require('morgan');
 var mongoose   = require('mongoose');
+var config = require('./config');
 
-// Module for Booking Model
-//var bookingRoute = require('./app/routes/bookings')
-
-mongoose.connect('mongodb://admin:1qaz.2wsx.@ds039421.mongolab.com:39421/kinetica');
+// Connect to database specified in the config
+mongoose.connect(config.database);
 
 // Logger for development
 app.use(logger('dev'));
 
-// configure app to use bodyParser()
-// this will let us get the data from a POST
+// this will let us get the data from a POST in JSON format
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
@@ -34,14 +32,12 @@ app.all('/*', function(req, res, next) {
 });
 
 // Auth Middleware - This will check if the token is valid
-// Only the requests that start with /api/v1/* will be checked for the token.
+// Only the requests that start with /v1/* will be checked for the token.
 // Any URL's that do not follow the below pattern should be avoided unless you 
 // are sure that authentication is not needed
 app.all('/v1/*', [require('./app/middlewares/validateRequest')]);
 
-// more routes for our API will happen here
-
-// REGISTER OUR ROUTES -------------------------------
+// Register our routes: /app/routes/index.js
 app.use('/', require('./app/routes'));
  
 // If no route is matched by now, it must be a 404
@@ -58,17 +54,18 @@ var port = process.env.PORT || 8080;        // set our port
 // =============================================================================
 var router = express.Router();              // get an instance of the express Router
 
+/*
 // middleware to use for all requests
 router.use(function(req, res, next) {
     // do logging
     console.log('A request has been done');
     next(); // make sure we go to the next routes and don't stop here
 });
+*/
 
-
-// test route to make sure everything is working (accessed at GET http://localhost:8080/api)
+// test route to make sure everything is working (accessed at GET http://localhost:8080/)
 router.get('/', function(req, res) {
-    res.json({ message: 'hooray! welcome to our api!' });   
+    res.json({ message: 'Welcome to our secure api' });
 });
 
 
@@ -76,4 +73,4 @@ router.get('/', function(req, res) {
 // START THE SERVER
 // =============================================================================
 app.listen(port);
-console.log('Magic happens on port ' + port);
+console.log('Listening ' + port);

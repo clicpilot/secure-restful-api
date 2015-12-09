@@ -1,5 +1,6 @@
 var jwt = require('jwt-simple');
 var auth = require('../routes/auth');
+var config = require('../../config');
  
 module.exports = function(req, res, next) {
  
@@ -14,7 +15,7 @@ module.exports = function(req, res, next) {
  
   if (token) {
     try {
-      var decoded = jwt.decode(token, require('../config/secret.js')());
+      var decoded = jwt.decode(token, config.secret);
  
       if (decoded.exp <= Date.now()) {
         res.status(400);

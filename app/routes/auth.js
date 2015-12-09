@@ -1,6 +1,6 @@
 var jwt = require('jwt-simple');
 var bcrypt = require('bcrypt');
-var secret = require('../config/secret');
+var config = require('../../config');
 
 var User = require('../models/user');
 
@@ -115,7 +115,7 @@ function generateToken(username) {
         //iss: user.id - //issuer
         exp: expires,
         username: username
-    }, secret());
+    }, config.secret);
 
     // return token, expiration date and username
     return {
