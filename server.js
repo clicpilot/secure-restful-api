@@ -7,7 +7,9 @@ var mongoose   = require('mongoose');
 var config = require('./config');
 
 // Connect to database specified in the config
-mongoose.connect(config.database);
+//mongoose.connect(config.database);
+mongoose.connect(config.databaseURI[app.settings.env]);
+
 
 // Logger for development
 app.use(logger('dev'));
@@ -71,3 +73,5 @@ router.get('/', function(req, res) {
 // =============================================================================
 app.listen(port);
 console.log('Listening ' + port);
+
+module.exports = app;
