@@ -3,8 +3,6 @@ process.env.NODE_ENV = 'test';
 var chai = require('chai');
 var chaiHttp = require('chai-http');
 var server = require('../server');
-var mongoose = require("mongoose");
-var should = chai.should();
 
 var Booking = require('../app/models/booking');
 
@@ -81,9 +79,29 @@ describe('Test Bookings', function() {
             });
     });
 
+    it('should list a SINGLE booking on /booking/:id GET', function(done){
+        var newBooking = new Booking({
+            name: 'New booking'
+        });
 
-    //it('should list a SINGLE booking on /booking/<id> GET');
-    //it('should add a SINGLE booking on /bookings POST');
+        newBooking.save(function(err, data) {
+            chai.request(server)
+                .get('/v1/booking/'+ data.id)
+                .set('x-access-token', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0NTAyNTM3MDg3ODYsInVzZXJuYW1lIjoiaGFzYW5odEBnbWFpbC5jb20ifQ.ae_Jpo26oEvBMz-H0qyNeBmFxzbgXM0QbmfLZKJm_JQ')
+                .end(function(err, res){
+                    res.should.have.status(200);
+                    res.should.be.json;
+                    res.body.should.be.a('object');
+                    res.body.should.have.property('_id');
+                    res.body.should.have.property('name');
+                    res.body.name.should.equal('New booking');
+                    res.body._id.should.equal(data.id);
+                    done();
+                });
+        });
+
+    });
+
     //it('should update a SINGLE booking on /booking/<id> PUT');
     //it('should delete a SINGLE booking on /booking/<id> DELETE');
 });
