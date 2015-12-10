@@ -140,7 +140,7 @@ var routers = {
         Booking.update({ _id: id }, { $set: { name: req.body.name }}, function(err){
             if (err){res.send(err);}
 
-            res.json({ message: 'Booking updated!' });
+            res.status(201).json({ message: 'Booking updated!' });
         });
 
 
@@ -155,7 +155,7 @@ var routers = {
             if (err)
                 res.send(err);
 
-            res.json({ message: 'Successfully deleted' });
+            res.status(204).json({ message: 'Successfully deleted' });
         });
 
     }

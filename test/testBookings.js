@@ -3,6 +3,7 @@ process.env.NODE_ENV = 'test';
 var chai = require('chai');
 var chaiHttp = require('chai-http');
 var server = require('../server');
+var should = chai.should();
 
 var Booking = require('../app/models/booking');
 
@@ -102,6 +103,41 @@ describe('Test Bookings', function() {
 
     });
 
-    //it('should update a SINGLE booking on /booking/<id> PUT');
-    //it('should delete a SINGLE booking on /booking/<id> DELETE');
+
+    it('should update a SINGLE booking on /booking/:id PUT', function(done){
+        var newBooking = new Booking({
+            name: 'New booking'
+        });
+
+        newBooking.save(function(err, data) {
+            chai.request(server)
+                .put('/v1/booking/'+ data.id)
+                .send({name : "Updated Booking"})
+                .set('x-access-token', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0NTAyNTM3MDg3ODYsInVzZXJuYW1lIjoiaGFzYW5odEBnbWFpbC5jb20ifQ.ae_Jpo26oEvBMz-H0qyNeBmFxzbgXM0QbmfLZKJm_JQ')
+                .end(function(err, res){
+                    res.should.have.status(201);
+                    done();
+                });
+        });
+
+    });
+
+
+    it('should delete a SINGLE booking on /booking/:id DELETE', function(done){
+        var newBooking = new Booking({
+            name: 'New booking'
+        });
+
+        newBooking.save(function(err, data) {
+            chai.request(server)
+                .delete('/v1/booking/'+ data.id)
+                .set('x-access-token', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0NTAyNTM3MDg3ODYsInVzZXJuYW1lIjoiaGFzYW5odEBnbWFpbC5jb20ifQ.ae_Jpo26oEvBMz-H0qyNeBmFxzbgXM0QbmfLZKJm_JQ')
+                .end(function(err, res){
+                    res.should.have.status(204);
+                    done();
+                });
+        });
+
+    });
+
 });
