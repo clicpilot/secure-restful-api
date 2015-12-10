@@ -20,10 +20,22 @@ After installing modules, start API in local environment by
 
 ## Testing
 
+This tests are integration tests.
+
 You should install mocha globally first
 
 > npm install -g mocha
 
-After installing mocha, you will just start by typing
+You should install MongoDB and run
+
+> ./bin/mongod --dbpath \<Project-Folder\>/test/db
+
+Then create a database named **api-test** by first open ./bin/mongo and type
+
+> \> use api-test
+
+The default db folder for the db should be located in test folder
+
+You will just start by typing
 
 > npm test

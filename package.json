@@ -23,7 +23,6 @@
   },
   "devDependencies": {
     "chai": "^3.4.1",
-    "chai-http": "^1.0.0",
-    "nock": "^3.4.0"
+    "chai-http": "^1.0.0"
   }
 }

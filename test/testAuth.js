@@ -1,9 +1,8 @@
+process.env.NODE_ENV = 'test';
+
 var chai = require('chai');
 var chaiHttp = require('chai-http');
 var server = require('../server');
-var should = chai.should();
-var nock = require('nock');
-
 
 chai.use(chaiHttp);
 
@@ -14,6 +13,12 @@ describe('Test Auth', function() {
 
     this.timeout(10000);
 
+    beforeEach(function(done){
+        done();
+    });
+    afterEach(function(done){
+        done();
+    });
 
     // it() statements contain each individual test case, which generally (err, should) test a single feature
     it('should give an user already exist error /register', function(done) {
