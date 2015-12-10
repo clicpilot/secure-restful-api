@@ -1,22 +1,22 @@
 var jwt = require('jwt-simple');
 var auth = require('../routes/auth');
 var config = require('../../config');
- 
+
 module.exports = function(req, res, next) {
- 
+
   // When performing a cross domain request, you will recieve
   // a preflighted request first. This is to check if our the app
   // is safe. 
- 
+
   // We skip the token outh for [OPTIONS] requests.
   //if(req.method == 'OPTIONS') next();
- 
+
   var token = (req.body && req.body.access_token) || (req.query && req.query.access_token) || req.headers['x-access-token'];
- 
+
   if (token) {
     try {
       var decoded = jwt.decode(token, config.secret);
- 
+
       if (decoded.exp <= Date.now()) {
         res.status(400);
         res.json({
@@ -25,7 +25,7 @@ module.exports = function(req, res, next) {
         });
         return;
       }
- 
+
       // Authorize the user to see if s/he can access our resources
       // The key would be the logged in user's username
       auth.validateUser(decoded.username, function(err, user){
@@ -53,18 +53,17 @@ module.exports = function(req, res, next) {
         }
       });
 
- 
-    } catch (err) {
-      /*
-      res.status(500);
-      res.json({
-        "status": 500,
-        "message": "Oops something went wrong",
-        "error": err
-      });
-      */
 
-      res.status(500).sendFile(require('path').join(__dirname, 'static/500.html'));
+    } catch (err) {
+
+      res.status(403);
+      res.json({
+        "status": 403,
+        "message": "Not Authorized"
+      });
+      return;
+
+      //res.status(500).sendFile(require('path').join(__dirname, 'static/500.html'));
 
 
     }

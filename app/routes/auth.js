@@ -68,23 +68,36 @@ var auth = {
     var password = req.body.password || '';
     var role = req.body.role || '';
 
-    var user = new User();
 
-    user.username = username;
-    user.role = role;
-    
+      User.findOne({username: username})
+          .select('username')
+          .exec(function (err, user) {
 
-    bcrypt.hash(req.body.password, 10, function (err, hash) {
-      user.password = hash;
-      user.save(function(err,user) {
+              if(!user){
+                  // User does not exist
+                  var user = new User();
 
-        if(err) { return(next(err)); }
+                  user.username = username;
+                  user.role = role;
 
 
-        res.status(201).send();
-        //res.json(user);
-      });
-     });
+                  bcrypt.hash(password, 10, function (err, hash) {
+                      user.password = hash;
+                      user.save(function(err,user) {
+
+                          if(err) { return(next(err)); }
+
+
+                          res.status(201).send();
+                          //res.json(user);
+                      });
+                  });
+              }
+              else{
+                  // User already exist - Send Conflict Http: 409
+                  res.status(409).send();
+              }
+          });
 
   },
  

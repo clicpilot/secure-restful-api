@@ -4,7 +4,7 @@
   "description": "This is a template project for secure RESTful API",
   "main": "server.js",
   "scripts": {
-    "start": "node ./server.js",
+    "start": "node server.js",
     "test": "mocha test"
   },
   "keywords": [
@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "chai": "^3.4.1",
-    "chai-http": "^1.0.0"
+    "chai-http": "^1.0.0",
+    "nock": "^3.4.0"
   }
 }

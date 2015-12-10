@@ -71,3 +71,5 @@ router.get('/', function(req, res) {
 // =============================================================================
 app.listen(port);
 console.log('Listening ' + port);
+
+module.exports = app;
