@@ -4,8 +4,12 @@ var chai = require('chai');
 var chaiHttp = require('chai-http');
 var server = require('../server');
 var should = chai.should();
+var jwt = require('jwt-simple');
+var bcrypt = require('bcrypt');
+var config = require('../config');
 
 var Booking = require('../app/models/booking');
+var User = require('../app/models/user');
 
 
 chai.use(chaiHttp);
@@ -14,9 +18,47 @@ chai.use(chaiHttp);
 /* describe() is used for grouping tests in a logical manner. */
 describe('Test Bookings', function() {
 
-    this.timeout(30000);
+    this.timeout(10000);
 
-    Booking.collection.drop();
+    /* This token will be used in all test cases*/
+    var token;
+
+    before(function(done){
+        Booking.collection.drop();
+        User.collection.drop();
+
+
+        var user = new User();
+        var password = "12345.";
+        user.username = "trial@gmail.com";
+        user.role = "admin";
+        user.password = "A1234.";
+
+        user.save(function(err,user) {
+
+            if(err) { return(next(err)); }
+
+            var days = 7;
+            var dateObj = new Date();
+            var expires= dateObj.setDate(dateObj.getDate() + days);
+
+            // Put username into encoded string, not password
+            token = jwt.encode({
+                //iss: user.id - //issuer
+                exp: expires,
+                username: user.username
+            }, config.secret);
+
+
+            done();
+        });
+    });
+
+    after(function(done){
+        Booking.collection.drop();
+        User.collection.drop();
+        done();
+    });
 
     beforeEach(function(done){
         done();
@@ -56,7 +98,7 @@ describe('Test Bookings', function() {
 
         chai.request(server)
             .get('/v1/bookings')
-            .set('x-access-token', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0NTAyNTM3MDg3ODYsInVzZXJuYW1lIjoiaGFzYW5odEBnbWFpbC5jb20ifQ.ae_Jpo26oEvBMz-H0qyNeBmFxzbgXM0QbmfLZKJm_JQ')
+            .set('x-access-token', token)
             .end(function(err, res){
                 res.should.have.status(200);
                 res.should.be.json;
@@ -70,7 +112,7 @@ describe('Test Bookings', function() {
         chai.request(server)
             .post('/v1/bookings')
             .send({name: "This is a test booking"})
-            .set('x-access-token', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0NTAyNTM3MDg3ODYsInVzZXJuYW1lIjoiaGFzYW5odEBnbWFpbC5jb20ifQ.ae_Jpo26oEvBMz-H0qyNeBmFxzbgXM0QbmfLZKJm_JQ')
+            .set('x-access-token', token)
             .end(function(err, res){
                 res.should.have.status(201);
                 res.should.be.json;
@@ -88,7 +130,7 @@ describe('Test Bookings', function() {
         newBooking.save(function(err, data) {
             chai.request(server)
                 .get('/v1/booking/'+ data.id)
-                .set('x-access-token', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0NTAyNTM3MDg3ODYsInVzZXJuYW1lIjoiaGFzYW5odEBnbWFpbC5jb20ifQ.ae_Jpo26oEvBMz-H0qyNeBmFxzbgXM0QbmfLZKJm_JQ')
+                .set('x-access-token', token)
                 .end(function(err, res){
                     res.should.have.status(200);
                     res.should.be.json;
@@ -113,7 +155,7 @@ describe('Test Bookings', function() {
             chai.request(server)
                 .put('/v1/booking/'+ data.id)
                 .send({name : "Updated Booking"})
-                .set('x-access-token', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0NTAyNTM3MDg3ODYsInVzZXJuYW1lIjoiaGFzYW5odEBnbWFpbC5jb20ifQ.ae_Jpo26oEvBMz-H0qyNeBmFxzbgXM0QbmfLZKJm_JQ')
+                .set('x-access-token', token)
                 .end(function(err, res){
                     res.should.have.status(201);
                     done();
@@ -131,7 +173,7 @@ describe('Test Bookings', function() {
         newBooking.save(function(err, data) {
             chai.request(server)
                 .delete('/v1/booking/'+ data.id)
-                .set('x-access-token', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0NTAyNTM3MDg3ODYsInVzZXJuYW1lIjoiaGFzYW5odEBnbWFpbC5jb20ifQ.ae_Jpo26oEvBMz-H0qyNeBmFxzbgXM0QbmfLZKJm_JQ')
+                .set('x-access-token', token)
                 .end(function(err, res){
                     res.should.have.status(204);
                     done();

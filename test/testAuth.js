@@ -16,28 +16,51 @@ describe('Test Auth', function() {
 
     this.timeout(10000);
 
+    User.collection.drop();
+
     beforeEach(function(done){
         done();
     });
     afterEach(function(done){
+        User.collection.drop();
         done();
     });
 
-    // it() statements contain each individual test case, which generally (err, should) test a single feature
+
+
     it('should give an user already exist error /register', function(done) {
 
-        chai.request(server)
-            .post('/register')
-            .send({'username': 'hasanht@gmail.com', 'password': '123456'})
-            .end(function(err, res){
-                // Conflict - User already exist
-                res.should.have.status(409);
+        var user = new User();
+        var password = "12345.";
+        user.username = "trial@gmail.com";
+        user.role = "admin";
 
-                done();
+
+        bcrypt.hash(password, 10, function (err, hash) {
+            user.password = hash;
+
+            // First create the user
+            user.save(function(err,user) {
+
+                if(err) { return(next(err)); }
+
+
+                // Again try to register the current user. should give conflict
+                chai.request(server)
+                    .post('/register')
+                    .send({'username': user.username, 'password': password})
+                    .end(function(err, res){
+                        // Conflict - User already exist
+                        res.should.have.status(409);
+
+                        done();
+                    });
             });
+        });
+
     });
 
-    // it() statements contain each individual test case, which generally (err, should) test a single feature
+
     it('should give an user/password empty error /register', function(done) {
 
         chai.request(server)
@@ -52,7 +75,7 @@ describe('Test Auth', function() {
     });
 
 
-    // it() statements contain each individual test case, which generally (err, should) test a single feature
+
     it('should give an user/password empty error /login', function(done) {
 
         chai.request(server)
@@ -67,7 +90,7 @@ describe('Test Auth', function() {
     });
 
 
-    // it() statements contain each individual test case, which generally (err, should) test a single feature
+
     it('should give an invalid cridentials error /login', function(done) {
 
         chai.request(server)
@@ -82,8 +105,7 @@ describe('Test Auth', function() {
     });
 
 
-    // it() statements contain each individual test case, which generally (err, should) test a single feature
-    it('should send token on valid login /login', function(done) {
+    it('should send token on valid login', function(done) {
 
         var user = new User();
         var password = "12345.";
@@ -109,6 +131,8 @@ describe('Test Auth', function() {
                         res.body.should.have.property('token');
                         res.body.should.have.property('expires');
                         res.body.should.have.property('username');
+
+                        res.body.username.should.equal(user.username);
 
                         done();
                     });
