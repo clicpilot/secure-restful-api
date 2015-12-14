@@ -68,7 +68,7 @@ describe('Test Bookings', function() {
 
     it('should add a SINGLE booking on /bookings POST', function(done){
         chai.request(server)
-            .post('/v1/booking')
+            .post('/v1/bookings')
             .send({name: "This is a test booking"})
             .set('x-access-token', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0NTAyNTM3MDg3ODYsInVzZXJuYW1lIjoiaGFzYW5odEBnbWFpbC5jb20ifQ.ae_Jpo26oEvBMz-H0qyNeBmFxzbgXM0QbmfLZKJm_JQ')
             .end(function(err, res){

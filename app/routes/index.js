@@ -15,8 +15,9 @@ router.post('/register', auth.register);
  * Routes that can be accessed only by autheticated users
  */
 router.get('/v1/bookings', bookings.getAll);
+router.post('/v1/bookings/', bookings.create);
+
 router.get('/v1/booking/:id', bookings.getOne);
-router.post('/v1/booking/', bookings.create);
 router.put('/v1/booking/:id', bookings.update);
 router.delete('/v1/booking/:id', bookings.delete);
  
