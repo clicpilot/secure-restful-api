@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "mocha test"
+    "test": "mocha test",
+    "coverage" : "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha"
   },
   "keywords": [
     "RESTful",
@@ -23,6 +24,7 @@
   },
   "devDependencies": {
     "chai": "^3.4.1",
-    "chai-http": "^1.0.0"
+    "chai-http": "^1.0.0",
+    "istanbul": "^0.4.1"
   }
 }

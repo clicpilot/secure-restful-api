@@ -39,3 +39,12 @@ The default db folder for the db should be located in test folder
 You will just start by typing
 
 > npm test
+
+## Code Coverage
+Run istanbul for code coverage
+
+> \> ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha
+
+or
+
+> \> npm run coverage 
