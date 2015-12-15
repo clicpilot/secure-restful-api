@@ -35,6 +35,7 @@ describe('Test Bookings', function() {
         user.role = "admin";
         user.password = "A1234.";
 
+
         user.save(function(err,user) {
 
             if(err) { return(next(err)); }

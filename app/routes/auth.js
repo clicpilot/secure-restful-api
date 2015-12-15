@@ -52,7 +52,7 @@ var auth = {
                     }
 
                     //var token = jwt.encode({username: user.username}, secret());
-                    var token = generateToken(user.username);
+                    var token = generateToken(user);
 
                     // Send OK
                     res.status(200).send(token);
@@ -129,21 +129,22 @@ var auth = {
 };
 
 // This method generates JWT string using username
-function generateToken(username) {
+function generateToken(user) {
     var expires = expiresIn(7); // 7 days
 
     // Put username into encoded string, not password
     var token = jwt.encode({
         //iss: user.id - //issuer
         exp: expires,
-        username: username
+        username: user.username,
+        userId: user._id
     }, config.secret);
 
     // return token, expiration date and username
     return {
         token: token,
         expires: expires,
-        username: username
+        username: user.username
     };
 }
 

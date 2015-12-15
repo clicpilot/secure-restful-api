@@ -31,7 +31,12 @@ module.exports = function(req, res, next) {
             auth.validateUser(decoded.username, function(err, user){
                 if(user){
                     if ((req.url.indexOf('admin') >= 0 && dbUser.role == 'admin') || (req.url.indexOf('admin') < 0 && req.url.indexOf('/v1/') >= 0)) {
-                        next(); // To move to next middleware
+
+                        // Pass user_id to subsequent calls
+                        res.user_id = decoded.user_id;
+
+                        // To move to next middleware
+                        next();
                     }
                     else
                     {
