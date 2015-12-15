@@ -29,6 +29,74 @@ describe('Test Auth', function() {
     });
 
 
+    it('should register a user /register', function(done) {
+
+        var newuser = new User();
+        var password = "12345.";
+        newuser.username = "trial@gmail.com";
+        newuser.role = "admin";
+        newuser.profile = {
+            firstname: "Hasan",
+            lastname: "Topcu",
+            phone: "905051111111",
+            email: "mymail@gmail.com",
+            photoUrl: "/My/Photo/Url/On/Aws"
+        };
+
+        newuser.store = {
+            storeName: "Hasan",
+            bio: "Topcu",
+            photoUrl: "/My/Photo/Url/On/Aws",
+            phone: "905051111111",
+            email: "mymail@gmail.com",
+            address: "mymail@gmail.com",
+            latitude: "mymail@gmail.com",
+            longtitude: "mymail@gmail.com"
+        };
+
+
+        bcrypt.hash(password, 10, function (err, hash) {
+            newuser.password = hash;
+
+            // Again try to register the current user. should give conflict
+            chai.request(server)
+                .post('/register')
+                .send(newuser)
+                .end(function (err, res) {
+
+
+                    res.should.have.status(201);
+
+                    User.findOne({username: newuser.username})
+                        .exec(function (err, user) {
+
+                            newuser.username.should.equal(user.username);
+                            newuser.role.should.equal(user.role);
+                            newuser.profile.firstname.should.equal(user.profile.firstname);
+                            newuser.profile.lastname.should.equal(user.profile.lastname);
+                            newuser.profile.phone.should.equal(user.profile.phone);
+                            newuser.profile.email.should.equal(user.profile.email);
+                            newuser.profile.photoUrl.should.equal(user.profile.photoUrl);
+
+                            newuser.store.storeName.should.equal(user.store.storeName);
+                            newuser.store.bio.should.equal(user.store.bio);
+                            newuser.store.photoUrl.should.equal(user.store.photoUrl);
+                            newuser.store.phone.should.equal(user.store.phone);
+                            newuser.store.email.should.equal(user.store.email);
+                            newuser.store.address.should.equal(user.store.address);
+                            newuser.store.latitude.should.equal(user.store.latitude);
+                            newuser.store.longtitude.should.equal(user.store.longtitude);
+
+                            done();
+
+                        });
+
+                });
+
+        });
+
+    });
+
 
     it('should give an user already exist error /register', function(done) {
 
@@ -43,9 +111,6 @@ describe('Test Auth', function() {
 
             // First create the user
             user.save(function (err, user) {
-
-
-                console.log(err);
 
                 // Again try to register the current user. should give conflict
                 chai.request(server)

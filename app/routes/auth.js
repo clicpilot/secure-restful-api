@@ -67,6 +67,8 @@ var auth = {
         var username = req.body.username || '';
         var password = req.body.password || '';
         var role = req.body.role || '';
+        var profile = req.body.profile || '';
+        var store = req.body.store || '';
 
         // If user or password, credentials error
         if (username == '' || password == '') {
@@ -88,13 +90,17 @@ var auth = {
 
                     user.username = username;
                     user.role = role;
+                    user.profile = profile;
+                    user.store = store;
 
 
                     bcrypt.hash(password, 10, function (err, hash) {
                         user.password = hash;
                         user.save(function(err,user) {
 
-                            if(err) { return(next(err)); }
+                            if(err) {
+                                return(next(err));
+                            }
 
 
                             res.status(201).send();
