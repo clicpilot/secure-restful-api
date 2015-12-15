@@ -1,5 +1,4 @@
-//var express = require('express');
-//var router = express.Router();
+var etag = require('etag')
 
 var Booking     = require('../models/booking');
 
@@ -17,14 +16,33 @@ var routers = {
 
     /* Get single instance of booking */
     getOne: function(req, res) {
+
         var id = req.params.id;
-
-        Booking.findById(id, function(err, booking) {
-            if (err)
+        Booking.findById(id, function (err, booking) {
+            if (err) {
                 res.send(err);
+            }
 
+            var etagHeader = req.headers['If-None-Match'] || req.headers['if-none-match'];
+
+            /* we need a determinic order of properties  */
+            //var computedEtag = etag(JSON.stringify(booking));
+
+            var computedEtag = etag(booking._id + ";" + booking.name);
+
+            if (etagHeader) {
+                if (etagHeader == computedEtag) {
+                    // if ETag of the resource matches with that ETag, res.status(304).send() // Not modified
+                    res.status(304).send();
+                    return;
+                }
+            }
+
+            res.header('ETag', computedEtag);
             res.json(booking);
         });
+
+
     },
 
     /* Create a booking */
