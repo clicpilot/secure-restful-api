@@ -7,6 +7,7 @@ var should = chai.should();
 var jwt = require('jwt-simple');
 var bcrypt = require('bcrypt');
 var config = require('../config');
+var etag = require('etag')
 
 var Booking = require('../app/models/booking');
 var User = require('../app/models/user');
@@ -122,7 +123,7 @@ describe('Test Bookings', function() {
             });
     });
 
-    it('should list a SINGLE booking on /booking/:id GET', function(done){
+    it('should get a SINGLE booking on /booking/:id GET', function(done){
         var newBooking = new Booking({
             name: 'New booking'
         });
@@ -137,7 +138,7 @@ describe('Test Bookings', function() {
                     res.body.should.be.a('object');
                     res.body.should.have.property('_id');
                     res.body.should.have.property('name');
-                    res.body.name.should.equal('New booking');
+                    res.body.name.should.equal(newBooking.name);
                     res.body._id.should.equal(data.id);
                     done();
                 });
@@ -181,5 +182,55 @@ describe('Test Bookings', function() {
         });
 
     });
+
+
+    /* Wrong etag */
+    it('should get a non-cached booking on /booking/:id GET', function(done){
+        var newBooking = new Booking({
+            name: 'New booking'
+        });
+
+        newBooking.save(function(err, data) {
+            chai.request(server)
+                .get('/v1/booking/'+ data.id)
+                .set('x-access-token', token)
+                .set('if-none-match', 'etag-no-match')
+                .end(function(err, res){
+                    res.should.have.status(200);
+                    res.should.be.json;
+                    res.body.should.be.a('object');
+                    res.body.should.have.property('_id');
+                    res.body.should.have.property('name');
+                    res.body.name.should.equal(newBooking.name);
+                    res.body._id.should.equal(data.id);
+                    done();
+                });
+        });
+
+    });
+
+    /* Correct etag */
+    it('should get a 304 Not modified on /booking/:id GET', function(done){
+        var newBooking = new Booking({
+            name: 'New booking'
+        });
+
+        newBooking.save(function(err, data) {
+
+            //var tag = etag(JSON.stringify(data));
+            var tag = etag(data._id + ";" + data.name);
+            chai.request(server)
+                .get('/v1/booking/'+ data.id)
+                .set('x-access-token', token)
+                .set('if-none-match', tag)
+                .end(function(err, res){
+                    res.should.have.status(304);
+
+                    done();
+                });
+        });
+
+    });
+
 
 });
