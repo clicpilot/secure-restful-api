@@ -2,7 +2,7 @@ This is a template project equipped with
 
 * Security with JWT
 * Testing with mocha and chai
-* Versioning
+* Caching with ETag
 
 
 # Guides
@@ -20,7 +20,7 @@ After installing modules, start API in local environment by
 
 ## Testing
 
-This tests are integration tests.
+These tests are integration tests.
 
 You should install mocha globally first
 
