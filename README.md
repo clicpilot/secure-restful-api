@@ -1,4 +1,4 @@
-https://travis-ci.org/hhtopcu/secure-restful-api.svg?branch=master
+[![Build Status](https://travis-ci.org/hhtopcu/secure-restful-api.svg?branch=master)](https://travis-ci.org/hhtopcu/secure-restful-api)
 
 This is a template project equipped with
 
