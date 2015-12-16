@@ -3,11 +3,7 @@ node_js:
   - "5"
   - "4"
 
-env:
-  - DEPLOY_VERSION=testing
-
 before_install:
-  - "npm config set spin false"
   - "node . install -g ."
 
 script: "npm test"
