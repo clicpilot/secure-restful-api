@@ -1,3 +1,5 @@
+https://travis-ci.org/hhtopcu/secure-restful-api.svg?branch=master
+
 This is a template project equipped with
 
 * Security with JWT
