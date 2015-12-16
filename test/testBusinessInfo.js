@@ -107,6 +107,20 @@ describe('Test Business Info', function() {
     });
 
 
+    it('should get a not found error for business info /businessinfo/:id /GET', function(done) {
+
+        chai.request(server)
+            .get('/v1/businessinfo/'+ 'a12345')
+            .set('x-access-token', mToken)
+            .end(function(err, res){
+
+                (err === null).should.be.true;
+                res.should.have.status(404);
+                done();
+            });
+
+    });
+
     it('should get a single business info /businessinfo/:id /GET', function(done) {
 
         chai.request(server)
@@ -130,7 +144,7 @@ describe('Test Business Info', function() {
                 res.body.should.have.property('longtitude');
 
 
-                res.body._id.should.equal(mBusinessInfo._id);
+                res.body._id.should.equal(mUser.businessId + "");
                 res.body.storeName.should.equal(mBusinessInfo.storeName);
                 res.body.bio.should.equal(mBusinessInfo.bio);
                 res.body.photoUrl.should.equal(mBusinessInfo.photoUrl);

@@ -3,7 +3,8 @@ var router = express.Router();
  
 var auth = require('./auth.js');
 var bookings = require('./bookings.js');
-//var user = require('./users.js');
+var businessinfo = require('./businessinfo.js');
+
  
 /*
  * Routes that can be accessed by any one
@@ -16,10 +17,15 @@ router.post('/register', auth.register);
  */
 router.get('/v1/bookings', bookings.getAll);
 router.post('/v1/bookings/', bookings.create);
-
 router.get('/v1/booking/:id', bookings.getOne);
 router.put('/v1/booking/:id', bookings.update);
 router.delete('/v1/booking/:id', bookings.delete);
+
+
+
+router.get('/v1/businessinfo/:id', businessinfo.getOne);
+router.put('/v1/businessinfo/:id', businessinfo.update);
+
  
 /*
  * Routes that can be accessed only by authenticated & authorized users
