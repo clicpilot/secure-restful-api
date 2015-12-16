@@ -9,8 +9,8 @@ var businessinfo = require('./businessinfo.js');
 /*
  * Routes that can be accessed by any one
  */
-router.post('/login', auth.login);
-router.post('/register', auth.register);
+router.post('/v1/login', auth.login);
+router.post('/v1/register', auth.register);
  
 /*
  * Routes that can be accessed only by autheticated users
