@@ -3,6 +3,7 @@ var bcrypt = require('bcrypt');
 var config = require('../../config');
 
 var User = require('../models/user');
+var BusinessInfo = require('../models/businessInfo');
 
 var auth = {
 
@@ -23,12 +24,12 @@ var auth = {
         }
 
         // First find the user
-        User.findOne({username: req.body.username})
-            .select('password').select('username')
+        User.findOne({username: username})
+            .select('+password')// select all fields but additionaly password, because its select = false in the model
             .exec(function (err, user) {
-                if (err) { return next(err); }
 
-                if (!user) {
+                // If error exists or user could't be found
+                if (err || !user) {
                     res.status(401);
                     res.json({
                         "status": 401,
@@ -37,10 +38,21 @@ var auth = {
                     return;
                 }
 
+                console.log("User:" + user);
+                console.log("Password:" + password);
+                console.log("User Password:" + user.password);
+
                 // Decrypt and compare the user password
                 bcrypt.compare(password, user.password, function (err, valid) {
 
-                    if (err) { return next(err); }
+                    if (err) {
+                        res.status(401);
+                        res.json({
+                            "status": 401,
+                            "message": "Invalid credentials"
+                        });
+                        return;
+                    }
 
                     if (!valid) {
                         res.status(401);
@@ -51,7 +63,6 @@ var auth = {
                         return;
                     }
 
-                    //var token = jwt.encode({username: user.username}, secret());
                     var token = generateToken(user);
 
                     // Send OK
@@ -64,11 +75,13 @@ var auth = {
 
 
     register: function(req, res){
-        var username = req.body.username || '';
-        var password = req.body.password || '';
-        var role = req.body.role || '';
-        var profile = req.body.profile || '';
-        var store = req.body.store || '';
+        var username = req.body.user.username || '';
+        var password = req.body.user.password || '';
+        var role = req.body.user.role || '';
+
+
+        var profile = req.body.user.profile || '';
+        var business = req.body.business || '';
 
         // If user or password, credentials error
         if (username == '' || password == '') {
@@ -86,27 +99,72 @@ var auth = {
 
                 if(!user){
                     // User does not exist
-                    var user = new User();
+                    // Then first create business info
 
-                    user.username = username;
-                    user.role = role;
-                    user.profile = profile;
-                    user.store = store;
+                    var businessInfo = new BusinessInfo();
+                    businessInfo.storeName = business.storeName;
+                    businessInfo.bio = business.bio;
+                    businessInfo.photoUrl = business.photoUrl;
+                    businessInfo.phone = business.phone;
+                    businessInfo.email = business.email;
+                    businessInfo.address = business.address;
+                    businessInfo.latitude = business.latitude;
+                    businessInfo.longtitude = business.longtitude;
+
+                    businessInfo.save(function(err,bsns) {
+
+                        if(err) {
+                            // Send: Bad Request
+                            res.status(400).send();
+                        }
+
+                        // Business is created successfully
+                        // Now create a user
+                        if(role == "store"){
+                            var user = new User();
+
+                            user.username = username;
+                            user.role = role;
+                            user.profile = profile;
 
 
-                    bcrypt.hash(password, 10, function (err, hash) {
-                        user.password = hash;
-                        user.save(function(err,user) {
+                            bcrypt.hash(password, 10, function (err, hash) {
+                                user.password = hash;
+                                user.businessId = bsns._id;
 
-                            if(err) {
-                                return(next(err));
-                            }
+                                // Save the user
+                                user.save(function(err,user) {
+
+                                    if(err) {
+
+                                        // if user cannot be saved then remove the business
+                                        bsns.remove().exec();
+
+                                        // Send: Bad Request
+                                        res.status(400).send();
+                                    }
+
+                                    // If everything is OK, send 201
+                                    res.status(201).send();
+                                });
+                            });
+                        }else if(role == "driver"){
+                            // TODO: Create driver
 
 
-                            res.status(201).send();
-                            //res.json(user);
-                        });
+                        }
+                        else if(role == "admin"){
+                            // TODO: Create driver
+
+
+                        }
+
                     });
+
+
+
+
+
                 }
                 else{
                     // User already exist - Send Conflict Http: 409
@@ -120,7 +178,6 @@ var auth = {
 
         process.nextTick(function(){
             User.findOne({username: username})
-                .select('username')
                 .exec(function (err, user) {
 
                     callback(err, user);

@@ -33,7 +33,9 @@ module.exports = function(req, res, next) {
                     if ((req.url.indexOf('admin') >= 0 && dbUser.role == 'admin') || (req.url.indexOf('admin') < 0 && req.url.indexOf('/v1/') >= 0)) {
 
                         // Pass user_id to subsequent calls
-                        res.user_id = decoded.user_id;
+                        req.user_id = user._id;
+                        req.businessId = user.businessId;
+                        req.driverId = user.driverId;
 
                         // To move to next middleware
                         next();
