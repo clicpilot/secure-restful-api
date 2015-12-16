@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/hhtopcu/secure-restful-api.svg?branch=master)](https://travis-ci.org/hhtopcu/secure-restful-api)
+[![Coverage Status](https://coveralls.io/repos/hhtopcu/secure-restful-api/badge.svg?branch=master&service=github)](https://coveralls.io/github/hhtopcu/secure-restful-api?branch=master)
 
 This is a template project equipped with
 
