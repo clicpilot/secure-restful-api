@@ -48,9 +48,9 @@ describe('Test Auth', function() {
             photoUrl: "/My/Photo/Url/On/Aws",
             phone: "905051111111",
             email: "mymail@gmail.com",
-            address: "mymail@gmail.com",
-            latitude: "mymail@gmail.com",
-            longtitude: "mymail@gmail.com"
+            address: "Los Angeles, CA",
+            latitude: "40.12345",
+            longtitude: "45.243242"
         };
 
         bcrypt.hash(password, 10, function (err, hash) {
@@ -241,9 +241,11 @@ describe('Test Auth', function() {
                         decoded.should.have.property('userId');
                         decoded.should.have.property('username');
                         decoded.should.have.property('exp');
+                        decoded.should.have.property('businessId');
 
                         decoded.userId.should.equal(user.id);
                         decoded.username.should.equal(user.username);
+                        decoded.businessId.should.equal(user.businessId + ""); // Convert to string
 
 
                         done();

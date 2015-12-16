@@ -34,8 +34,8 @@ module.exports = function(req, res, next) {
 
                         // Pass user_id to subsequent calls
                         req.user_id = user._id;
-                        req.businessId = user.businessId;
-                        req.driverId = user.driverId;
+                        //req.businessId = user.businessId;
+                        //req.driverId = user.driverId;
 
                         // To move to next middleware
                         next();

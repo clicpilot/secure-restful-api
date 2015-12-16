@@ -38,23 +38,10 @@ var auth = {
                     return;
                 }
 
-                console.log("User:" + user);
-                console.log("Password:" + password);
-                console.log("User Password:" + user.password);
-
                 // Decrypt and compare the user password
                 bcrypt.compare(password, user.password, function (err, valid) {
 
-                    if (err) {
-                        res.status(401);
-                        res.json({
-                            "status": 401,
-                            "message": "Invalid credentials"
-                        });
-                        return;
-                    }
-
-                    if (!valid) {
+                    if (err || !valid) {
                         res.status(401);
                         res.json({
                             "status": 401,
@@ -161,10 +148,6 @@ var auth = {
 
                     });
 
-
-
-
-
                 }
                 else{
                     // User already exist - Send Conflict Http: 409
@@ -181,9 +164,6 @@ var auth = {
                 .exec(function (err, user) {
 
                     callback(err, user);
-                    //if (err) { return null; }
-
-                    //return user;
                 });
         });
 
@@ -197,10 +177,10 @@ function generateToken(user) {
 
     // Put username into encoded string, not password
     var token = jwt.encode({
-        //iss: user.id - //issuer
         exp: expires,
         username: user.username,
-        userId: user._id
+        userId: user._id,
+        businessId: user.businessId,
     }, config.secret);
 
     // return token, expiration date and username

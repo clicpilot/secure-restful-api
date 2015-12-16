@@ -19,7 +19,6 @@ chai.use(chaiHttp);
 /* describe() is used for grouping tests in a logical manner. */
 describe('Test Bookings', function() {
 
-    this.timeout(10000);
 
     /* This token will be used in all test cases*/
     var token;
