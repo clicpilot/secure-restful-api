@@ -5,67 +5,157 @@ var chaiHttp = require('chai-http');
 var bcrypt = require('bcrypt');
 var server = require('../server');
 var should = chai.should();
+var config = require('../config');
+var jwt = require('jwt-simple');
 
 chai.use(chaiHttp);
 
 var User = require('../app/models/user');
+var BusinessInfo = require('../app/models/businessInfo');
 
 /* describe() is used for grouping tests in a logical manner. */
 describe('Test Auth', function() {
 
+    var newuser;
+    var newbusiness;
+    var password = "12345.";
 
-    this.timeout(10000);
 
-    User.collection.drop();
+
+    before(function(done){
+        User.collection.drop();
+        BusinessInfo.collection.drop();
+        done();
+    });
+
+
 
     beforeEach(function(done){
-        done();
+        newuser = new User();
+        newuser.username = "trial@gmail.com";
+        newuser.role = "store";
+        newuser.profile = {
+            firstname: "Hasan",
+            lastname: "Topcu",
+            phone: "905051111111",
+            email: "mymail@gmail.com",
+            photoUrl: "/My/Photo/Url/On/Aws"
+        };
+
+        newbusiness = {
+            storeName: "Hasan",
+            bio: "Topcu",
+            photoUrl: "/My/Photo/Url/On/Aws",
+            phone: "905051111111",
+            email: "mymail@gmail.com",
+            address: "Los Angeles, CA",
+            latitude: "40.12345",
+            longtitude: "45.243242"
+        };
+
+        bcrypt.hash(password, 10, function (err, hash) {
+            newuser.password = hash;
+
+
+            done();
+        });
+
     });
+
     afterEach(function(done){
         User.collection.drop();
+        BusinessInfo.collection.drop();
+
         done();
     });
 
+
+    it('should register a user /register', function(done) {
+
+        // Again try to register the current user. should give conflict
+        chai.request(server)
+            .post('/register')
+            .send({user: newuser, business: newbusiness, driver: {}})
+            .end(function (err, res) {
+
+
+                res.should.have.status(201);
+
+                User.findOne({username: newuser.username})
+                    .exec(function (err, user) {
+
+                        newuser.username.should.equal(user.username);
+                        newuser.role.should.equal(user.role);
+                        newuser.profile.firstname.should.equal(user.profile.firstname);
+                        newuser.profile.lastname.should.equal(user.profile.lastname);
+                        newuser.profile.phone.should.equal(user.profile.phone);
+                        newuser.profile.email.should.equal(user.profile.email);
+                        newuser.profile.photoUrl.should.equal(user.profile.photoUrl);
+
+                        done();
+
+                    });
+
+                BusinessInfo.findOne({_id: newuser.businessId})
+                    .exec(function (err, business) {
+
+
+                        newbusiness.storeName.should.equal(business.storeName);
+                        newbusiness.bio.should.equal(business.bio);
+                        newbusiness.photoUrl.should.equal(business.photoUrl);
+                        newbusiness.phone.should.equal(business.phone);
+                        newbusiness.email.should.equal(business.email);
+                        newbusiness.address.should.equal(business.address);
+                        newbusiness.latitude.should.equal(business.latitude);
+                        newbusiness.longtitude.should.equal(business.longtitude);
+
+                        done();
+
+                    });
+
+
+
+
+            });
+
+
+
+    });
 
 
     it('should give an user already exist error /register', function(done) {
 
-        var user = new User();
-        var password = "12345.";
-        user.username = "trial@gmail.com";
-        user.role = "admin";
+        // First create the user
+        newuser.save(function (err, user) {
 
+            // Again try to register the current user. should give conflict
+            chai.request(server)
+                .post('/register')
+                .send({user: user})
+                .end(function (err, res) {
+                    // Conflict - User already exist
+                    res.should.have.status(409);
 
-        bcrypt.hash(password, 10, function (err, hash) {
-            user.password = hash;
+                    done();
+                });
 
-            // First create the user
-            user.save(function(err,user) {
-
-                if(err) { return(next(err)); }
-
-
-                // Again try to register the current user. should give conflict
-                chai.request(server)
-                    .post('/register')
-                    .send({'username': user.username, 'password': password})
-                    .end(function(err, res){
-                        // Conflict - User already exist
-                        res.should.have.status(409);
-
-                        done();
-                    });
-            });
         });
+
 
     });
 
 
     it('should give an user/password empty error /register', function(done) {
 
+        var user = new User();
+        user.username = '';
+        user.password = '';
+        user.role = '';
+
+
         chai.request(server)
             .post('/register')
-            .send({'username': '', 'password': ''})
+            .send({user: user})
             .end(function(err, res){
                 // Conflict - User already exist
                 res.should.have.status(401);
@@ -80,7 +170,7 @@ describe('Test Auth', function() {
 
         chai.request(server)
             .post('/login')
-            .send({'username': '', 'password': ''})
+            .send({username: '', password: ''})
             .end(function(err, res){
                 // Conflict - User already exist
                 res.should.have.status(401);
@@ -105,26 +195,33 @@ describe('Test Auth', function() {
     });
 
 
-    it('should send token on valid login', function(done) {
-
-        var user = new User();
-        var password = "12345.";
-        user.username = "trial@gmail.com";
-        user.role = "admin";
+    it('should send token on valid store login', function(done) {
 
 
-        bcrypt.hash(password, 10, function (err, hash) {
-            user.password = hash;
-            user.save(function(err,user) {
+        var businessInfo = new BusinessInfo();
+        businessInfo.storeName = newbusiness.storeName;
+        businessInfo.bio = newbusiness.bio;
+        businessInfo.photoUrl = newbusiness.photoUrl;
+        businessInfo.phone = newbusiness.phone;
+        businessInfo.email = newbusiness.email;
+        businessInfo.address = newbusiness.address;
+        businessInfo.latitude = newbusiness.latitude;
+        businessInfo.longtitude = newbusiness.longtitude;
 
-                if(err) { return(next(err)); }
 
+        businessInfo.save(function(err,bsns) {
+
+            newuser.businessId = bsns._id;
+
+            // Save the user
+            newuser.save(function(err,user) {
 
                 chai.request(server)
                     .post('/login')
-                    .send({'username': user.username, 'password': password})
+                    .send({username: newuser.username, password: password})
                     .end(function(err, res){
-                        // Conflict - User already exist
+
+
                         res.should.have.status(200);
 
                         res.body.should.be.a('object');
@@ -134,15 +231,37 @@ describe('Test Auth', function() {
 
                         res.body.username.should.equal(user.username);
 
+
+
+                        // Decode the token generated by jwt
+                        var decoded = jwt.decode(res.body.token, config.secret);
+
+                        console.log(decoded);
+
+                        decoded.should.have.property('userId');
+                        decoded.should.have.property('username');
+                        decoded.should.have.property('exp');
+                        decoded.should.have.property('businessId');
+
+                        decoded.userId.should.equal(user.id);
+                        decoded.username.should.equal(user.username);
+                        decoded.businessId.should.equal(user.businessId + ""); // Convert to string
+
+
                         done();
                     });
+
+
             });
+
+
+
         });
 
-
-
-
     });
+
+
+
 
 
 });
