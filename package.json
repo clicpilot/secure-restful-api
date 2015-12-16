@@ -12,6 +12,10 @@
     "RESTful",
     "API"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hhtopcu/secure-restful-api.git"
+  },
   "author": "Hasan Huseyin Topcu",
   "license": "MIT",
   "dependencies": {
