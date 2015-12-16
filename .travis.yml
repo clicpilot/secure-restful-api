@@ -4,6 +4,7 @@ node_js:
   - "4"
 
 before_install:
-  - "node . install -g ."
+  - "npm install -g mocha"
+  - "npm install -g express"
 
 script: "npm test"
