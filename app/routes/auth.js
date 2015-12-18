@@ -1,6 +1,7 @@
 var jwt = require('jwt-simple');
 var bcrypt = require('bcrypt');
 var config = require('../../config');
+var sendgrid  = require('sendgrid')
 
 var User = require('../models/user');
 var BusinessInfo = require('../models/businessInfo');
@@ -107,7 +108,7 @@ var auth = {
 
                         // Business is created successfully
                         // Now create a user
-                        if(role == "store"){
+                        if(role == "store") {
                             var user = new User();
 
                             user.username = username;
@@ -135,12 +136,12 @@ var auth = {
                                     res.status(201).send();
                                 });
                             });
-                        }else if(role == "driver"){
+                        }else if(role == "driver") {
                             // TODO: Create driver
 
 
                         }
-                        else if(role == "admin"){
+                        else if(role == "admin") {
                             // TODO: Create driver
 
 
@@ -157,9 +158,69 @@ var auth = {
 
     },
 
+    /** This method manages the forgotten password  */
+    forgot: function(req, res) {
+        var username = req.body.username || '';
+
+        // If user or password, credentials error
+        if (username == '') {
+            res.status(401);
+            res.json({
+                "status": 401,
+                "message": "Invalid credentials"
+            });
+            return;
+        }
+
+        User.findOne({username: username})
+            .exec(function (err, user) {
+                if(err) {
+                    res.status(401);
+                    res.json({
+                        "status": 401,
+                        "message": "Invalid credentials"
+                    });
+                    return;
+                }
+
+                if(user) {
+                    var mail = sendgrid(config.sendgridApiKey);
+
+                    mail.send({
+                        to:       username,
+                        from:     'no-reply@mapia.com',
+                        subject:  'Password reset',
+                        text:     'Password reset e-mail.'
+                    }, function(err, json) {
+
+                        if (err) {
+                            res.status(500);
+                            res.json({
+                                "status": 500,
+                                "message": "Internal error"
+                            });
+                            return;
+                        }
+
+                        res.status(200).send(json);
+                    });
+                } else {
+                    res.status(401);
+                    res.json({
+                        "status": 401,
+                        "message": "Invalid credentials"
+                    });
+                    return;
+                }
+
+
+
+            });
+    },
+
     validateUser: function(username, callback) {
 
-        process.nextTick(function(){
+        process.nextTick(function() {
             User.findOne({username: username})
                 .exec(function (err, user) {
 
