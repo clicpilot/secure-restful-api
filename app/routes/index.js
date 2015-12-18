@@ -11,6 +11,7 @@ var businessinfo = require('./businessinfo.js');
  */
 router.post('/login', auth.login);
 router.post('/register', auth.register);
+router.post('/forgot', auth.forgot);
  
 /*
  * Routes that can be accessed only by autheticated users
