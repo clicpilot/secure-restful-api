@@ -12,7 +12,6 @@ var bcrypt = require('bcrypt');
 var config = require('../config');
 
 var User = require('../app/models/user');
-var BusinessInfo = require('../app/models/businessInfo');
 
 chai.use(chaiHttp);
 
@@ -23,8 +22,6 @@ describe('Test Business Info', function() {
     var mToken;
     var mUser;
     var mBusinessInfo;
-
-
 
     before(function(done){
         var newuser = new User();
@@ -40,62 +37,50 @@ describe('Test Business Info', function() {
             photoUrl: "/My/Photo/Url/On/Aws"
         };
 
-        mBusinessInfo = {
+        newuser.business = {
             storeName: "Hasan",
             bio: "Topcu",
             photoUrl: "/My/Photo/Url/On/Aws",
             phone: "905051111111",
             email: "mymail@gmail.com",
-            address: "Los Angeles, CA",
-            latitude: "40.12345",
-            longtitude: "45.243242"
+            address: {
+                street: "Mustafa Kemal mh.",
+                city: "Ankara",
+                country: "TR",
+                zip: "06510",
+                location: {
+                    type : "Point",
+                    coordinates : [36.6362, 42.12145]
+                }
+            }
         };
+
 
         bcrypt.hash(newuser.password, 10, function (err, hash) {
             newuser.password = hash;
 
+            // Save the user
+            newuser.save(function(err,user) {
 
-            var businessInfo = new BusinessInfo();
-            businessInfo.storeName = mBusinessInfo.storeName;
-            businessInfo.bio = mBusinessInfo.bio;
-            businessInfo.photoUrl = mBusinessInfo.photoUrl;
-            businessInfo.phone = mBusinessInfo.phone;
-            businessInfo.email = mBusinessInfo.email;
-            businessInfo.address = mBusinessInfo.address;
-            businessInfo.latitude = mBusinessInfo.latitude;
-            businessInfo.longtitude = mBusinessInfo.longtitude;
+                var days = 7;
+                var dateObj = new Date();
+                var expires= dateObj.setDate(dateObj.getDate() + days);
 
+                // Put username into encoded string, not password
+                mToken = jwt.encode({
+                    //iss: user.id - //issuer
+                    exp: expires,
+                    username: user.username,
+                    userId: user._id,
+                    businessId: user.businessId
+                }, config.secret);
 
-            businessInfo.save(function(err,bsns) {
-
-                newuser.businessId = bsns._id;
-
-                // Save the user
-                newuser.save(function(err,user) {
-
-                    var days = 7;
-                    var dateObj = new Date();
-                    var expires= dateObj.setDate(dateObj.getDate() + days);
-
-                    // Put username into encoded string, not password
-                    mToken = jwt.encode({
-                        //iss: user.id - //issuer
-                        exp: expires,
-                        username: user.username,
-                        userId: user._id,
-                        businessId: user.businessId
-                    }, config.secret);
-
-                    mUser = user;
+                mUser = user;
 
 
-                    done();
-
-                });
+                done();
             });
-
         });
-
     });
 
     beforeEach(function(done){
@@ -124,14 +109,13 @@ describe('Test Business Info', function() {
     it('should get a single business info /businessinfo/:id /GET', function(done) {
 
         chai.request(server)
-            .get('/v1/businessinfo/'+ mUser.businessId)
+            .get('/v1/businessinfo/'+ mUser.business.id)
             .set('x-access-token', mToken)
             .end(function(err, res){
 
                 res.should.have.status(200);
                 res.should.be.json;
                 res.body.should.be.a('object');
-
 
                 res.body.should.have.property('_id');
                 res.body.should.have.property('storeName');
@@ -140,20 +124,20 @@ describe('Test Business Info', function() {
                 res.body.should.have.property('phone');
                 res.body.should.have.property('email');
                 res.body.should.have.property('address');
-                res.body.should.have.property('latitude');
-                res.body.should.have.property('longtitude');
 
+                res.body.address.should.have.property('street');
+                res.body.address.should.have.property('city');
+                res.body.address.should.have.property('country');
+                res.body.address.should.have.property('zip');
+                res.body.address.should.have.property('location');
+                res.body.address.should.have.property('createdDate');
 
-                res.body._id.should.equal(mUser.businessId + "");
-                res.body.storeName.should.equal(mBusinessInfo.storeName);
-                res.body.bio.should.equal(mBusinessInfo.bio);
-                res.body.photoUrl.should.equal(mBusinessInfo.photoUrl);
-                res.body.phone.should.equal(mBusinessInfo.phone);
-                res.body.email.should.equal(mBusinessInfo.email);
-                res.body.address.should.equal(mBusinessInfo.address);
-                res.body.latitude.should.equal(mBusinessInfo.latitude);
-                res.body.longtitude.should.equal(mBusinessInfo.longtitude);
-
+                res.body._id.should.equal(mUser.business._id + "");
+                res.body.storeName.should.equal(mUser.business.storeName);
+                res.body.bio.should.equal(mUser.business.bio);
+                res.body.photoUrl.should.equal(mUser.business.photoUrl);
+                res.body.phone.should.equal(mUser.business.phone);
+                res.body.email.should.equal(mUser.business.email);
 
                 done();
             });
@@ -162,16 +146,71 @@ describe('Test Business Info', function() {
 
     it('should update a single business info /businessinfo/:id /PUT', function(done) {
 
+        var updated = {
+            storeName: "Kinetica",
+            bio: "Mobile Development Agency",
+            photoUrl: "/My/Photo/Url/On/Aws",
+            phone: "905051111111",
+            email: "mymail@gmail.com",
+            address: {
+                street: "Mustafa Kemal mh.",
+                city: "Ankara",
+                country: "TR",
+                zip: "06510",
+                location: {
+                    type : "Point",
+                    coordinates : [36.6362, 42.12145]
+                }
+            }
+        };
+
+        // Send request
         chai.request(server)
-            .put('/v1/businessinfo/'+ mUser.businessId)
+            .put('/v1/businessinfo/'+ mUser.business.id)
             .set('x-access-token', mToken)
+            .send({business: updated})
             .end(function(err, res){
 
+                (err === null).should.be.true;
                 res.should.have.status(201);
 
-                done();
-            });
+                // Find the business info about the user
+                User.findOne({'business._id': mUser.business.id})
+                    .select('business')
+                    .exec(function (err, user) {
 
+                        (err === null).should.be.true;
+
+                        var business = user.business;
+
+                        business.should.have.property('_id');
+                        business.should.have.property('storeName');
+                        business.should.have.property('bio');
+                        business.should.have.property('photoUrl');
+                        business.should.have.property('phone');
+                        business.should.have.property('email');
+                        business.should.have.property('address');
+
+                        business.address.should.have.property('street');
+                        business.address.should.have.property('city');
+                        business.address.should.have.property('country');
+                        business.address.should.have.property('zip');
+                        business.address.should.have.property('location');
+                        business.address.should.have.property('createdDate');
+
+
+                        mUser.business.id.should.equal(business._id + "");
+                        business.storeName.should.equal(updated.storeName);
+                        business.bio.should.equal(updated.bio);
+                        business.photoUrl.should.equal(updated.photoUrl);
+                        business.phone.should.equal(updated.phone);
+                        business.email.should.equal(updated.email);
+
+
+
+                        done();
+                    });
+            });
     });
 
 
