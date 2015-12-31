@@ -9,49 +9,65 @@ var routers = {
     /* Get single instance of booking */
     getOne: function(req, res) {
 
-        var id = mongoose.Types.ObjectId(req.params.id);
+        var valid = mongoose.Types.ObjectId.isValid(req.params.id);
 
-        User.findOne({'business._id': id})
-            .select('business')
-            .exec(function (err, data) {
+        if (valid) {
+            var id = mongoose.Types.ObjectId(req.params.id);
 
-                if (err || !data) {
-                    res.status(404).send();
-                    return;
-                }
+            User.findOne({'business._id': id})
+                .select('business')
+                .exec(function (err, data) {
 
-                res.status(200).json(data.business);
+                    if (err || !data) {
+                        res.status(404).send();
+                        return;
+                    }
 
-            });
+                    res.status(200).json(data.business);
+
+                });
+        } else {
+            res.status(404).send();
+            return;
+        }
     },
 
 
     /* Update an existing booking */
     update: function(req, res, next) {
 
-        var id = mongoose.Types.ObjectId(req.params.id);
+        var valid = mongoose.Types.ObjectId.isValid(req.params.id);
 
-        var business = req.body.business || '';
+        if (valid) {
+            var id = mongoose.Types.ObjectId(req.params.id);
 
-        User.update({ 'business._id': id},
-            { $set: {
-                'business.storeName': business.storeName,
-                'business.bio': business.bio,
-                'business.photoUrl': business.photoUrl,
-                'business.photoMd5': business.photoMd5,
-                'business.phone': business.phone,
-                'business.email': business.email,
-                'business.storeName': business.storeName,
-            }}, function(err){
+            var business = req.body.business || '';
 
-                if (err) {
-                    console.log(err);
-                    res.status(409).send();
-                    return;
-                }
+            User.update({'business._id': id},
+                {
+                    $set: {
+                        'business.storeName': business.storeName,
+                        'business.bio': business.bio,
+                        'business.photoUrl': business.photoUrl,
+                        'business.photoMd5': business.photoMd5,
+                        'business.phone': business.phone,
+                        'business.email': business.email,
+                        'business.storeName': business.storeName,
+                    }
+                }, function (err) {
 
-                res.status(201).json({ message: 'Business Info is updated!' });
-            });
+                    if (err) {
+                        console.log(err);
+                        res.status(409).send();
+                        return;
+                    }
+
+                    res.status(201).json({message: 'Business Info is updated!'});
+                });
+        } else {
+            res.status(409).send();
+            return;
+        }
     },
 
 };
