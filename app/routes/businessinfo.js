@@ -38,6 +38,7 @@ var routers = {
                 'business.storeName': business.storeName,
                 'business.bio': business.bio,
                 'business.photoUrl': business.photoUrl,
+                'business.photoMd5': business.photoMd5,
                 'business.phone': business.phone,
                 'business.email': business.email,
                 'business.storeName': business.storeName,
