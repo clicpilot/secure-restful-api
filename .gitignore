@@ -1,0 +1,4 @@
+.idea/
+/coverage
+/test/db
+/node_modules

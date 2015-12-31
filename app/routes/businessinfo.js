@@ -2,8 +2,7 @@
  * Created by hhtopcu on 16/12/15.
  */
 var etag = require('etag')
-
-var BusinessInfo     = require('../models/businessInfo');
+var User = require('../models/user');
 
 var routers = {
 
@@ -12,34 +11,45 @@ var routers = {
 
         var id = req.params.id;
 
-        BusinessInfo.findById(id, function (err, business) {
-            if (err) {
-                res.status(404).send();
-                return;
-            }
+        User.findOne({'business._id': id})
+            .select('business')
+            .exec(function (err, user) {
 
-            res.status(200).json(business);
-        });
+                if (err) {
+                    res.status(404).send();
+                    return;
+                }
+
+                res.status(200).json(user.business);
+
+            });
     },
 
 
     /* Update an existing booking */
-    update: function(req, res) {
+    update: function(req, res, next) {
 
         var id = req.params.id;
 
+        var business = req.body.business || '';
 
-        BusinessInfo.update({ _id: id },
+        User.update({ 'business._id': id},
             { $set: {
-                name: req.body.name
+                'business.storeName': business.storeName,
+                'business.bio': business.bio,
+                'business.photoUrl': business.photoUrl,
+                'business.phone': business.phone,
+                'business.email': business.email,
+                'business.storeName': business.storeName,
             }}, function(err){
 
-                if (err) next();
+                if (err) {
+                    res.status(409).send();
+                    return;
+                }
 
-                res.status(201).json({ message: 'Booking updated!' });
+                res.status(201).json({ message: 'Business Info is updated!' });
             });
-
-
     },
 
 };

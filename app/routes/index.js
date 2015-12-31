@@ -4,7 +4,7 @@ var router = express.Router();
 var auth = require('./auth.js');
 var bookings = require('./bookings.js');
 var businessinfo = require('./businessinfo.js');
-
+var tests = require('./test.js');
  
 /*
  * Routes that can be accessed by any one
@@ -12,6 +12,8 @@ var businessinfo = require('./businessinfo.js');
 router.post('/login', auth.login);
 router.post('/register', auth.register);
 router.post('/forgot', auth.forgot);
+
+router.get('/test', tests.create);
  
 /*
  * Routes that can be accessed only by autheticated users

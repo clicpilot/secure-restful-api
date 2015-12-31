@@ -4,7 +4,6 @@ var config = require('../../config');
 var sendgrid  = require('sendgrid')
 
 var User = require('../models/user');
-var BusinessInfo = require('../models/businessInfo');
 
 var auth = {
 
@@ -66,10 +65,9 @@ var auth = {
         var username = req.body.user.username || '';
         var password = req.body.user.password || '';
         var role = req.body.user.role || '';
-
-
         var profile = req.body.user.profile || '';
-        var business = req.body.business || '';
+        var business = req.body.user.business || '';
+        var carDriver = req.body.carDriver || '';
 
         // If user or password, credentials error
         if (username == '' || password == '') {
@@ -87,67 +85,41 @@ var auth = {
 
                 if(!user){
                     // User does not exist
-                    // Then first create business info
+                    var user = new User();
 
-                    var businessInfo = new BusinessInfo();
-                    businessInfo.storeName = business.storeName;
-                    businessInfo.bio = business.bio;
-                    businessInfo.photoUrl = business.photoUrl;
-                    businessInfo.phone = business.phone;
-                    businessInfo.email = business.email;
-                    businessInfo.address = business.address;
-                    businessInfo.latitude = business.latitude;
-                    businessInfo.longtitude = business.longtitude;
+                    user.username = username;
+                    user.role = role;
+                    user.profile = profile;
 
-                    businessInfo.save(function(err,bsns) {
+                    // Business is created successfully
+                    // Now create a user
+                    if(role == "store") {
+                        user.business = business;
+                    }else if(role == "driver") {
+                        // TODO: Create driver
+                        user.carDriver = carDriver;
+                    }
+                    else if(role == "admin") {
+                        // TODO: Create driver
+                    }
 
-                        if(err) {
-                            // Send: Bad Request
-                            res.status(400).send();
-                        }
+                    // Hash the password
+                    bcrypt.hash(password, 10, function (err, hash) {
+                        user.password = hash;
 
-                        // Business is created successfully
-                        // Now create a user
-                        if(role == "store") {
-                            var user = new User();
+                        // Save the user
+                        user.save(function(err,user) {
 
-                            user.username = username;
-                            user.role = role;
-                            user.profile = profile;
+                            if(err) {
+                                // Send: Bad Request
+                                res.status(400).send();
+                            }
 
-
-                            bcrypt.hash(password, 10, function (err, hash) {
-                                user.password = hash;
-                                user.businessId = bsns._id;
-
-                                // Save the user
-                                user.save(function(err,user) {
-
-                                    if(err) {
-
-                                        // if user cannot be saved then remove the business
-                                        bsns.remove().exec();
-
-                                        // Send: Bad Request
-                                        res.status(400).send();
-                                    }
-
-                                    // If everything is OK, send 201
-                                    res.status(201).send();
-                                });
-                            });
-                        }else if(role == "driver") {
-                            // TODO: Create driver
-
-
-                        }
-                        else if(role == "admin") {
-                            // TODO: Create driver
-
-
-                        }
-
+                            // If everything is OK, send 201
+                            res.status(201).send();
+                        });
                     });
+
 
                 }
                 else{
