@@ -21,7 +21,6 @@ describe('Test Business Info', function() {
 
     var mToken;
     var mUser;
-    var mBusinessInfo;
 
     before(function(done){
         var newuser = new User();
@@ -212,7 +211,4 @@ describe('Test Business Info', function() {
                     });
             });
     });
-
-
-
 });
