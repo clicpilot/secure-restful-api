@@ -11,36 +11,42 @@ var jwt = require('jwt-simple');
 chai.use(chaiHttp);
 
 var User = require('../app/models/user');
+var Address = require('../app/models/address');
 
 /* describe() is used for grouping tests in a logical manner. */
 describe('Test Auth', function() {
 
-    var newuser;
+    var storeUser;
+    var driverUser;
     var password = "12345.";
 
     before(function(done){
+
+        Address.collection.drop();
         User.collection.drop();
         done();
     });
 
     beforeEach(function(done){
         // Create Model
-        newuser = new User();
-        newuser.username = "hhtopcu@gmail.com";
-        newuser.role = "store";
-        newuser.profile = {
+        storeUser = new User();
+        storeUser.username = "hhtopcu@gmail.com";
+        storeUser.role = "store";
+        storeUser.profile = {
             firstname: "Hasan",
             lastname: "Topcu",
             phone: "905051111111",
             email: "mymail@gmail.com",
-            photoUrl: "/My/Photo/Url/On/Aws"
+            photoUrl: "/My/Photo/Url/On/Aws",
+            photoMd5: "1abcdefghijklm",
         };
 
         // business information
-        newuser.business = {
-            storeName: "Hasan",
-            bio: "Topcu",
+        storeUser.business = {
+            storeName: "Kinetica",
+            bio: "Creative Mobile Development Agency",
             photoUrl: "/My/Photo/Url/On/Aws",
+            photoMd5: "3abcdefghijklm",
             phone: "905051111111",
             email: "mymail@gmail.com",
             address: {
@@ -55,9 +61,31 @@ describe('Test Auth', function() {
             }
         };
 
+        driverUser = new User();
+        driverUser.username = "atopcu@gmail.com";
+        driverUser.role = "driver";
+        driverUser.profile = {
+            firstname: "Ali",
+            lastname: "Topcu",
+            phone: "905051111111",
+            email: "mymail@gmail.com",
+            photoUrl: "/My/Photo/Url/On/Aws",
+            photoMd5: "2abcdefghijklm",
+        };
+
+        driverUser.carDriver = {
+            licenceNumber: "A12345678",
+            licenceImageUrl: "/My/Photo/Url/On/Aws",
+            licenceImageMd5: "4abcdefghijklm",
+            vehiclePlate: "06 DM 4532",
+            vehicleMake: "OPEL",
+            vin: "Wu789amm8920amsa-12392"
+        };
+
         // Hash the password
         bcrypt.hash(password, 10, function (err, hash) {
-            newuser.password = hash;
+            storeUser.password = hash;
+            driverUser.password = hash;
 
             done();
         });
@@ -66,42 +94,63 @@ describe('Test Auth', function() {
 
     afterEach(function(done){
         // After each test method, drop User collection
+        Address.collection.drop();
         User.collection.drop();
 
         done();
     });
 
 
-    it('should register a user /register', function(done) {
+    it('should give an error for a store user without business info', function(done) {
+
+        var aStoreWithoutBusinessDetails = new User();
+        aStoreWithoutBusinessDetails.username = storeUser.username;
+        aStoreWithoutBusinessDetails.password = storeUser.password;
+        aStoreWithoutBusinessDetails.role = storeUser.role;
+        aStoreWithoutBusinessDetails.profile = storeUser.profile;
+
 
         chai.request(server)
             .post('/register')
-            .send({user: newuser})
+            .send({user: aStoreWithoutBusinessDetails})
+            .end(function (err, res) {
+
+                // should register successfully
+                res.should.have.status(404);
+
+                done();
+            });
+    });
+
+    it('should register a store user with business info', function(done) {
+
+        chai.request(server)
+            .post('/register')
+            .send({user: storeUser})
             .end(function (err, res) {
 
                 // should register successfully
                 res.should.have.status(201);
 
-                User.findOne({username: newuser.username})
+                User.findOne({username: storeUser.username})
                     .exec(function (err, user) {
 
                         (err === null).should.be.true;
 
-                        //console.log(user)
+                        user.username.should.equal(storeUser.username);
+                        user.role.should.equal(storeUser.role);
+                        user.profile.firstname.should.equal(storeUser.profile.firstname);
+                        user.profile.lastname.should.equal(storeUser.profile.lastname);
+                        user.profile.phone.should.equal(storeUser.profile.phone);
+                        user.profile.email.should.equal(storeUser.profile.email);
+                        user.profile.photoUrl.should.equal(storeUser.profile.photoUrl);
+                        user.profile.photoMd5.should.equal(storeUser.profile.photoMd5);
 
-                        user.username.should.equal(newuser.username);
-                        user.role.should.equal(newuser.role);
-                        user.profile.firstname.should.equal(newuser.profile.firstname);
-                        user.profile.lastname.should.equal(newuser.profile.lastname);
-                        user.profile.phone.should.equal(newuser.profile.phone);
-                        user.profile.email.should.equal(newuser.profile.email);
-                        user.profile.photoUrl.should.equal(newuser.profile.photoUrl);
-
-                        user.business.storeName.should.equal(newuser.business.storeName);
-                        user.business.bio.should.equal(newuser.business.bio);
-                        user.business.photoUrl.should.equal(user.business.photoUrl);
-                        user.business.phone.should.equal(newuser.business.phone);
-                        user.business.email.should.equal(newuser.business.email);
+                        user.business.storeName.should.equal(storeUser.business.storeName);
+                        user.business.bio.should.equal(storeUser.business.bio);
+                        user.business.photoUrl.should.equal(storeUser.business.photoUrl);
+                        user.business.phone.should.equal(storeUser.business.phone);
+                        user.business.email.should.equal(storeUser.business.email);
 
 
                         user.business.should.have.property('address');
@@ -112,10 +161,66 @@ describe('Test Auth', function() {
                         user.business.address.should.have.property('location');
                         user.business.address.should.have.property('createdDate');
 
-                        user.business.address.street.should.equal(newuser.business.address.street);
-                        user.business.address.city.should.equal(newuser.business.address.city);
-                        user.business.address.country.should.equal(newuser.business.address.country);
-                        user.business.address.zip.should.equal(newuser.business.address.zip);
+                        user.business.address.street.should.equal(storeUser.business.address.street);
+                        user.business.address.city.should.equal(storeUser.business.address.city);
+                        user.business.address.country.should.equal(storeUser.business.address.country);
+                        user.business.address.zip.should.equal(storeUser.business.address.zip);
+
+                        done();
+                    });
+            });
+    });
+
+    it('should give an error for a driver user without car & driver details', function(done) {
+
+        var aDriverWithoutDriverDetails = new User();
+        aDriverWithoutDriverDetails.username = driverUser.username;
+        aDriverWithoutDriverDetails.password = driverUser.password;
+        aDriverWithoutDriverDetails.role = driverUser.role;
+        aDriverWithoutDriverDetails.profile = driverUser.profile;
+
+        chai.request(server)
+            .post('/register')
+            .send({user: aDriverWithoutDriverDetails})
+            .end(function (err, res) {
+
+                // should register successfully
+                res.should.have.status(404);
+
+                done();
+            });
+    });
+
+    it('should register a driver user with car & driver details', function(done) {
+
+        chai.request(server)
+            .post('/register')
+            .send({user: driverUser})
+            .end(function (err, res) {
+
+                // should register successfully
+                res.should.have.status(201);
+
+                User.findOne({username: driverUser.username})
+                    .exec(function (err, user) {
+
+                        (err === null).should.be.true;
+
+                        user.username.should.equal(driverUser.username);
+                        user.role.should.equal(driverUser.role);
+                        user.profile.firstname.should.equal(driverUser.profile.firstname);
+                        user.profile.lastname.should.equal(driverUser.profile.lastname);
+                        user.profile.phone.should.equal(driverUser.profile.phone);
+                        user.profile.email.should.equal(driverUser.profile.email);
+                        user.profile.photoUrl.should.equal(driverUser.profile.photoUrl);
+                        user.profile.photoMd5.should.equal(driverUser.profile.photoMd5);
+
+                        user.carDriver.licenceNumber.should.equal(driverUser.carDriver.licenceNumber);
+                        user.carDriver.licenceImageUrl.should.equal(driverUser.carDriver.licenceImageUrl);
+                        user.carDriver.licenceImageMd5.should.equal(driverUser.carDriver.licenceImageMd5);
+                        user.carDriver.vehiclePlate.should.equal(driverUser.carDriver.vehiclePlate);
+                        user.carDriver.vehicleMake.should.equal(driverUser.carDriver.vehicleMake);
+                        user.carDriver.vin.should.equal(driverUser.carDriver.vin);
 
                         done();
                     });
@@ -123,9 +228,10 @@ describe('Test Auth', function() {
     });
 
 
+
     it('should give an user already exist error /register', function(done) {
         // First create the user
-        newuser.save(function (err, user) {
+        storeUser.save(function (err, user) {
 
             // Again try to register the current user. should give conflict
             chai.request(server)
@@ -194,11 +300,11 @@ describe('Test Auth', function() {
     it('should send token on valid store login', function(done) {
 
         // Save the user
-        newuser.save(function(err,user) {
+        storeUser.save(function(err,user) {
 
             chai.request(server)
                 .post('/login')
-                .send({username: newuser.username, password: password})
+                .send({username: storeUser.username, password: password})
                 .end(function(err, res){
 
 
@@ -236,7 +342,7 @@ describe('Test Auth', function() {
     it('should send an email on /forgot', function(done) {
 
         // First create the user
-        newuser.save(function (err, user) {
+        storeUser.save(function (err, user) {
 
             chai.request(server)
                 .post('/forgot')

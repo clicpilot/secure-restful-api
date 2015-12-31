@@ -66,8 +66,9 @@ var auth = {
         var password = req.body.user.password || '';
         var role = req.body.user.role || '';
         var profile = req.body.user.profile || '';
+
         var business = req.body.user.business || '';
-        var carDriver = req.body.carDriver || '';
+        var carDriver = req.body.user.carDriver || '';
 
         // If user or password, credentials error
         if (username == '' || password == '') {
@@ -91,16 +92,30 @@ var auth = {
                     user.role = role;
                     user.profile = profile;
 
-                    // Business is created successfully
-                    // Now create a user
                     if(role == "store") {
-                        user.business = business;
-                    }else if(role == "driver") {
-                        // TODO: Create driver
-                        user.carDriver = carDriver;
-                    }
-                    else if(role == "admin") {
-                        // TODO: Create driver
+                        if(business) {
+                            user.business = business;
+                        } else {
+                            // A store user should have business info
+                            res.status(404).json({
+                                "status": 404,
+                                "message": "A store user should have business info"
+                            });
+
+                            return;
+                        }
+                    } else if(role == "driver") {
+                        if(carDriver) {
+                            user.carDriver = carDriver;
+                        } else {
+                            // A driver user should have car&driver details
+                            res.status(404).json({
+                                "status": 404,
+                                "message": "A driver user should have car&driver details"
+                            });
+
+                            return;
+                        }
                     }
 
                     // Hash the password
@@ -110,7 +125,7 @@ var auth = {
                         // Save the user
                         user.save(function(err,user) {
 
-                            if(err) {
+                            if (err) {
                                 // Send: Bad Request
                                 res.status(400).send();
                             }
@@ -121,8 +136,11 @@ var auth = {
                     });
 
 
-                }
-                else{
+                } else {
+
+                    console.log(user);
+
+
                     // User already exist - Send Conflict Http: 409
                     res.status(409).send();
                 }
@@ -213,7 +231,6 @@ function generateToken(user) {
         exp: expires,
         username: user.username,
         userId: user._id,
-        businessId: user.businessId,
     }, config.secret);
 
     // return token, expiration date and username

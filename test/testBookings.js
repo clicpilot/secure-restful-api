@@ -45,9 +45,9 @@ describe('Test Bookings', function() {
 
             // Put username into encoded string, not password
             token = jwt.encode({
-                //iss: user.id - //issuer
                 exp: expires,
-                username: user.username
+                username: user.username,
+                userId: user._id,
             }, config.secret);
 
 

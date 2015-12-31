@@ -4,16 +4,14 @@ var router = express.Router();
 var auth = require('./auth.js');
 var bookings = require('./bookings.js');
 var businessinfo = require('./businessinfo.js');
-var tests = require('./test.js');
- 
+var cardriver = require('./cardriver.js');
+
 /*
  * Routes that can be accessed by any one
  */
 router.post('/login', auth.login);
 router.post('/register', auth.register);
 router.post('/forgot', auth.forgot);
-
-router.get('/test', tests.create);
  
 /*
  * Routes that can be accessed only by autheticated users
@@ -28,6 +26,9 @@ router.delete('/v1/booking/:id', bookings.delete);
 
 router.get('/v1/businessinfo/:id', businessinfo.getOne);
 router.put('/v1/businessinfo/:id', businessinfo.update);
+
+router.get('/v1/cardriver/:id', cardriver.getOne);
+router.put('/v1/cardriver/:id', cardriver.update);
 
  
 /*

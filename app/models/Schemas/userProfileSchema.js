@@ -11,6 +11,7 @@ var UserProfileSchema   = new Schema({
     phone: { type: String, required: false },                   // User personal phone
     email: { type: String, required: false },                   // User personal email
     photoUrl: { type: String, required: false },                // Amazon S3 relative url
+    photoMd5: { type: String, required: false }                 // Amazon S3 relative url
 });
 
 module.exports = UserProfileSchema;
