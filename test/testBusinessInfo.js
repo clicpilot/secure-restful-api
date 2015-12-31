@@ -23,23 +23,25 @@ describe('Test Business Info', function() {
     var mUser;
 
     before(function(done){
-        var newuser = new User();
-        newuser.username = "trial@gmail.com";
-        newuser.role = "store";
-        newuser.password = "12345.";
-
-        newuser.profile = {
+        var storeUser = new User();
+        storeUser.username = "hhtopcu@gmail.com";
+        storeUser.password = "123456";
+        storeUser.role = "store";
+        storeUser.profile = {
             firstname: "Hasan",
             lastname: "Topcu",
             phone: "905051111111",
             email: "mymail@gmail.com",
-            photoUrl: "/My/Photo/Url/On/Aws"
+            photoUrl: "/My/Photo/Url/On/Aws",
+            photoMd5: "1abcdefghijklm",
         };
 
-        newuser.business = {
-            storeName: "Hasan",
-            bio: "Topcu",
+        // business information
+        storeUser.business = {
+            storeName: "Kinetica",
+            bio: "Creative Mobile Development Agency",
             photoUrl: "/My/Photo/Url/On/Aws",
+            photoMd5: "3abcdefghijklm",
             phone: "905051111111",
             email: "mymail@gmail.com",
             address: {
@@ -55,29 +57,33 @@ describe('Test Business Info', function() {
         };
 
 
-        bcrypt.hash(newuser.password, 10, function (err, hash) {
-            newuser.password = hash;
+        bcrypt.hash(storeUser.password, 10, function (err, hash) {
+            storeUser.password = hash;
 
             // Save the user
-            newuser.save(function(err,user) {
+            storeUser.save(function(err,user) {
 
-                var days = 7;
-                var dateObj = new Date();
-                var expires= dateObj.setDate(dateObj.getDate() + days);
+                if(!err) {
+                    var days = 7;
+                    var dateObj = new Date();
+                    var expires = dateObj.setDate(dateObj.getDate() + days);
 
-                // Put username into encoded string, not password
-                mToken = jwt.encode({
-                    //iss: user.id - //issuer
-                    exp: expires,
-                    username: user.username,
-                    userId: user._id,
-                    businessId: user.businessId
-                }, config.secret);
+                    // Put username into encoded string, not password
+                    mToken = jwt.encode({
+                        //iss: user.id - //issuer
+                        exp: expires,
+                        username: user.username,
+                        userId: user._id,
+                        businessId: user.businessId
+                    }, config.secret);
 
-                mUser = user;
+                    mUser = user;
 
 
-                done();
+                    done();
+                } else {
+                    console.log(err);
+                }
             });
         });
     });
@@ -120,6 +126,7 @@ describe('Test Business Info', function() {
                 res.body.should.have.property('storeName');
                 res.body.should.have.property('bio');
                 res.body.should.have.property('photoUrl');
+                res.body.should.have.property('photoMd5');
                 res.body.should.have.property('phone');
                 res.body.should.have.property('email');
                 res.body.should.have.property('address');
@@ -135,6 +142,7 @@ describe('Test Business Info', function() {
                 res.body.storeName.should.equal(mUser.business.storeName);
                 res.body.bio.should.equal(mUser.business.bio);
                 res.body.photoUrl.should.equal(mUser.business.photoUrl);
+                res.body.photoMd5.should.equal(mUser.business.photoMd5);
                 res.body.phone.should.equal(mUser.business.phone);
                 res.body.email.should.equal(mUser.business.email);
 
@@ -149,6 +157,7 @@ describe('Test Business Info', function() {
             storeName: "Kinetica",
             bio: "Mobile Development Agency",
             photoUrl: "/My/Photo/Url/On/Aws",
+            photoMd5: "7abcdefghijklm",
             phone: "905051111111",
             email: "mymail@gmail.com",
             address: {
@@ -186,6 +195,7 @@ describe('Test Business Info', function() {
                         business.should.have.property('storeName');
                         business.should.have.property('bio');
                         business.should.have.property('photoUrl');
+                        business.should.have.property('photoMd5');
                         business.should.have.property('phone');
                         business.should.have.property('email');
                         business.should.have.property('address');
@@ -202,6 +212,7 @@ describe('Test Business Info', function() {
                         business.storeName.should.equal(updated.storeName);
                         business.bio.should.equal(updated.bio);
                         business.photoUrl.should.equal(updated.photoUrl);
+                        business.photoMd5.should.equal(updated.photoMd5);
                         business.phone.should.equal(updated.phone);
                         business.email.should.equal(updated.email);
 
