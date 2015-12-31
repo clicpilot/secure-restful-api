@@ -82,8 +82,7 @@ describe('Test Business Info', function() {
                         //iss: user.id - //issuer
                         exp: expires,
                         username: user.username,
-                        userId: user._id,
-                        businessId: user.businessId
+                        userId: user._id
                     }, config.secret);
 
                     mUser = user;
@@ -111,7 +110,7 @@ describe('Test Business Info', function() {
     it('should get a not found error for business info /businessinfo/:id /GET', function(done) {
 
         chai.request(server)
-            .get('/v1/businessinfo/'+ 'a12345')
+            .get('/v1/businessinfo/'+ '4eb6e7e7e9b7f4194e000001')
             .set('x-access-token', mToken)
             .end(function(err, res){
 

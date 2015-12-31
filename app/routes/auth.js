@@ -231,7 +231,6 @@ function generateToken(user) {
         exp: expires,
         username: user.username,
         userId: user._id,
-        businessId: user.businessId,
     }, config.secret);
 
     // return token, expiration date and username

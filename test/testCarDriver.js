@@ -71,8 +71,7 @@ describe('Test Car&Driver Info', function() {
                         //iss: user.id - //issuer
                         exp: expires,
                         username: user.username,
-                        userId: user._id,
-                        businessId: user.businessId
+                        userId: user._id
                     }, config.secret);
 
                     mUser = user;
@@ -98,7 +97,7 @@ describe('Test Car&Driver Info', function() {
     it('should get a not found error for car&driver detail', function(done) {
 
         chai.request(server)
-            .get('/v1/cardriver/'+ 'a12345')
+            .get('/v1/cardriver/'+ '4eb6e7e7e9b7f4194e000001')
             .set('x-access-token', mToken)
             .end(function(err, res){
 

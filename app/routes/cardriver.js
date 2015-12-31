@@ -1,6 +1,7 @@
 /**
  * Created by hhtopcu on 31/12/15.
  */
+var mongoose        = require('mongoose');
 var User = require('../models/user');
 
 var routers = {
@@ -8,19 +9,18 @@ var routers = {
     /* Get single instance of booking */
     getOne: function(req, res) {
 
-        var id = req.params.id;
+        var id = mongoose.Types.ObjectId(req.params.id);
 
         User.findOne({'carDriver._id': id})
             .select('carDriver')
-            .exec(function (err, user) {
+            .exec(function (err, data) {
 
-                if (err) {
+                if ((err || !data)) {
                     res.status(404).send();
                     return;
                 }
 
-                res.status(200).json(user.carDriver);
-
+                res.status(200).json(data.carDriver);
             });
     },
 
@@ -28,7 +28,7 @@ var routers = {
     /* Update an existing booking */
     update: function(req, res, next) {
 
-        var id = req.params.id;
+        var id = mongoose.Types.ObjectId(req.params.id);
 
         var carDriver = req.body.carDriver || '';
 
@@ -43,6 +43,7 @@ var routers = {
             }}, function(err){
 
                 if (err) {
+                    console.log(err);
                     res.status(409).send();
                     return;
                 }
