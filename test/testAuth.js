@@ -23,9 +23,8 @@ describe('Test Auth', function() {
         done();
     });
 
-
-
     beforeEach(function(done){
+        // Create Model
         newuser = new User();
         newuser.username = "hhtopcu@gmail.com";
         newuser.role = "store";
@@ -37,6 +36,7 @@ describe('Test Auth', function() {
             photoUrl: "/My/Photo/Url/On/Aws"
         };
 
+        // business information
         newuser.business = {
             storeName: "Hasan",
             bio: "Topcu",
@@ -55,9 +55,9 @@ describe('Test Auth', function() {
             }
         };
 
+        // Hash the password
         bcrypt.hash(password, 10, function (err, hash) {
             newuser.password = hash;
-
 
             done();
         });
@@ -65,6 +65,7 @@ describe('Test Auth', function() {
     });
 
     afterEach(function(done){
+        // After each test method, drop User collection
         User.collection.drop();
 
         done();
@@ -73,12 +74,12 @@ describe('Test Auth', function() {
 
     it('should register a user /register', function(done) {
 
-        // Again try to register the current user. should give conflict
         chai.request(server)
             .post('/register')
             .send({user: newuser})
             .end(function (err, res) {
 
+                // should register successfully
                 res.should.have.status(201);
 
                 User.findOne({username: newuser.username})
@@ -241,7 +242,7 @@ describe('Test Auth', function() {
                 .post('/forgot')
                 .send({username: 'hhtopcu@gmail.com'})
                 .end(function (err, res) {
-                    // Conflict - User already exist
+                    // Mail has been sent successfuly
                     res.should.have.status(200);
 
                     done();
@@ -255,7 +256,7 @@ describe('Test Auth', function() {
             .post('/forgot')
             .send({username: ''})
             .end(function(err, res){
-                // Conflict - User already exist
+                // Invalid credentials
                 res.should.have.status(401);
 
                 done();
@@ -268,7 +269,7 @@ describe('Test Auth', function() {
             .post('/forgot')
             .send({username: 'nonosuchuser@gmail.com'})
             .end(function(err, res){
-                // Conflict - User already exist
+                // Invalid credentials
                 res.should.have.status(401);
 
                 done();
