@@ -12,6 +12,7 @@ var bcrypt = require('bcrypt');
 var config = require('../config');
 
 var User = require('../app/models/user');
+var Address = require('../app/models/address');
 
 chai.use(chaiHttp);
 
@@ -23,6 +24,14 @@ describe('Test Car&Driver Info', function() {
     var mUser;
 
     before(function(done){
+        // After each test method, drop User collection
+        Address.collection.drop();
+        User.collection.drop();
+
+        done();
+    });
+
+    beforeEach(function(done){
         var driverUser = new User();
         driverUser.username = "atopcu@gmail.com";
         driverUser.password = "atopcu";
@@ -77,11 +86,11 @@ describe('Test Car&Driver Info', function() {
         });
     });
 
-    beforeEach(function(done){
-        done();
-    });
-
     afterEach(function(done){
+        // After each test method, drop User collection
+        Address.collection.drop();
+        User.collection.drop();
+
         done();
     });
 

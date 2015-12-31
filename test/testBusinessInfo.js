@@ -12,6 +12,7 @@ var bcrypt = require('bcrypt');
 var config = require('../config');
 
 var User = require('../app/models/user');
+var Address = require('../app/models/address');
 
 chai.use(chaiHttp);
 
@@ -23,6 +24,14 @@ describe('Test Business Info', function() {
     var mUser;
 
     before(function(done){
+        // After each test method, drop User collection
+        Address.collection.drop();
+        User.collection.drop();
+
+        done();
+    });
+
+    beforeEach(function(done){
         var storeUser = new User();
         storeUser.username = "hhtopcu@gmail.com";
         storeUser.password = "123456";
@@ -88,13 +97,15 @@ describe('Test Business Info', function() {
         });
     });
 
-    beforeEach(function(done){
+
+    afterEach(function(done){
+        // After each test method, drop User collection
+        Address.collection.drop();
+        User.collection.drop();
+
         done();
     });
 
-    afterEach(function(done){
-        done();
-    });
 
 
     it('should get a not found error for business info /businessinfo/:id /GET', function(done) {
