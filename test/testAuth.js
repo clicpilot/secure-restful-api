@@ -112,7 +112,7 @@ describe('Test Auth', function() {
 
         chai.request(server)
             .post('/register')
-            .send({user: aStoreWithoutBusinessDetails})
+            .send(aStoreWithoutBusinessDetails)
             .end(function (err, res) {
 
                 // should register successfully
@@ -126,7 +126,7 @@ describe('Test Auth', function() {
 
         chai.request(server)
             .post('/register')
-            .send({user: storeUser})
+            .send(storeUser)
             .end(function (err, res) {
 
                 // should register successfully
@@ -166,6 +166,11 @@ describe('Test Auth', function() {
                         user.business.address.country.should.equal(storeUser.business.address.country);
                         user.business.address.zip.should.equal(storeUser.business.address.zip);
 
+                        user.business.address.location.should.have.property('type');
+                        user.business.address.location.should.have.property('coordinates');
+                        user.business.address.location.coordinates[0].should.equal(storeUser.business.address.location.coordinates[0]);
+                        user.business.address.location.coordinates[1].should.equal(storeUser.business.address.location.coordinates[1]);
+
                         done();
                     });
             });
@@ -181,7 +186,7 @@ describe('Test Auth', function() {
 
         chai.request(server)
             .post('/register')
-            .send({user: aDriverWithoutDriverDetails})
+            .send(aDriverWithoutDriverDetails)
             .end(function (err, res) {
 
                 // should register successfully
@@ -195,7 +200,7 @@ describe('Test Auth', function() {
 
         chai.request(server)
             .post('/register')
-            .send({user: driverUser})
+            .send(driverUser)
             .end(function (err, res) {
 
                 // should register successfully
@@ -236,7 +241,7 @@ describe('Test Auth', function() {
             // Again try to register the current user. should give conflict
             chai.request(server)
                 .post('/register')
-                .send({user: user})
+                .send(user)
                 .end(function (err, res) {
 
                     // Conflict - User already exist
@@ -257,7 +262,7 @@ describe('Test Auth', function() {
 
         chai.request(server)
             .post('/register')
-            .send({user: user})
+            .send(user)
             .end(function(err, res){
                 // Invalid cridentials
                 res.should.have.status(401);
@@ -356,7 +361,7 @@ describe('Test Auth', function() {
         });
     });
 
-    it('should send an error on /forgot', function(done) {
+    it('should send an invalid error on /forgot', function(done) {
 
         chai.request(server)
             .post('/forgot')
@@ -369,14 +374,14 @@ describe('Test Auth', function() {
             });
     });
 
-    it('should send an error on /forgot', function(done) {
+    it('should send an not found error on /forgot', function(done) {
 
         chai.request(server)
             .post('/forgot')
             .send({username: 'nonosuchuser@gmail.com'})
             .end(function(err, res){
                 // Invalid credentials
-                res.should.have.status(401);
+                res.should.have.status(404);
 
                 done();
             });

@@ -62,13 +62,13 @@ var auth = {
 
 
     register: function(req, res){
-        var username = req.body.user.username || '';
-        var password = req.body.user.password || '';
-        var role = req.body.user.role || '';
-        var profile = req.body.user.profile || '';
+        var username = req.body.username || '';
+        var password = req.body.password || '';
+        var role = req.body.role || '';
+        var profile = req.body.profile || '';
 
-        var business = req.body.user.business || '';
-        var carDriver = req.body.user.carDriver || '';
+        var business = req.body.business || '';
+        var carDriver = req.body.carDriver || '';
 
         // If user or password, credentials error
         if (username == '' || password == '') {
@@ -195,9 +195,9 @@ var auth = {
                         res.status(200).send(json);
                     });
                 } else {
-                    res.status(401);
+                    res.status(404);
                     res.json({
-                        "status": 401,
+                        "status": 404,
                         "message": "Invalid credentials"
                     });
                     return;
