@@ -195,9 +195,9 @@ var auth = {
                         res.status(200).send(json);
                     });
                 } else {
-                    res.status(401);
+                    res.status(404);
                     res.json({
-                        "status": 401,
+                        "status": 404,
                         "message": "Invalid credentials"
                     });
                     return;

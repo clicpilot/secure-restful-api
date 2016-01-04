@@ -356,7 +356,7 @@ describe('Test Auth', function() {
         });
     });
 
-    it('should send an error on /forgot', function(done) {
+    it('should send an invalid error on /forgot', function(done) {
 
         chai.request(server)
             .post('/forgot')
@@ -369,14 +369,14 @@ describe('Test Auth', function() {
             });
     });
 
-    it('should send an error on /forgot', function(done) {
+    it('should send an not found error on /forgot', function(done) {
 
         chai.request(server)
             .post('/forgot')
             .send({username: 'nonosuchuser@gmail.com'})
             .end(function(err, res){
                 // Invalid credentials
-                res.should.have.status(401);
+                res.should.have.status(404);
 
                 done();
             });
