@@ -112,7 +112,7 @@ describe('Test Auth', function() {
 
         chai.request(server)
             .post('/register')
-            .send({user: aStoreWithoutBusinessDetails})
+            .send(aStoreWithoutBusinessDetails)
             .end(function (err, res) {
 
                 // should register successfully
@@ -126,7 +126,7 @@ describe('Test Auth', function() {
 
         chai.request(server)
             .post('/register')
-            .send({user: storeUser})
+            .send(storeUser)
             .end(function (err, res) {
 
                 // should register successfully
@@ -181,7 +181,7 @@ describe('Test Auth', function() {
 
         chai.request(server)
             .post('/register')
-            .send({user: aDriverWithoutDriverDetails})
+            .send(aDriverWithoutDriverDetails)
             .end(function (err, res) {
 
                 // should register successfully
@@ -195,7 +195,7 @@ describe('Test Auth', function() {
 
         chai.request(server)
             .post('/register')
-            .send({user: driverUser})
+            .send(driverUser)
             .end(function (err, res) {
 
                 // should register successfully
@@ -236,7 +236,7 @@ describe('Test Auth', function() {
             // Again try to register the current user. should give conflict
             chai.request(server)
                 .post('/register')
-                .send({user: user})
+                .send(user)
                 .end(function (err, res) {
 
                     // Conflict - User already exist
@@ -257,7 +257,7 @@ describe('Test Auth', function() {
 
         chai.request(server)
             .post('/register')
-            .send({user: user})
+            .send(user)
             .end(function(err, res){
                 // Invalid cridentials
                 res.should.have.status(401);
