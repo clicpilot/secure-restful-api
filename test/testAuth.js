@@ -166,6 +166,11 @@ describe('Test Auth', function() {
                         user.business.address.country.should.equal(storeUser.business.address.country);
                         user.business.address.zip.should.equal(storeUser.business.address.zip);
 
+                        user.business.address.location.should.have.property('type');
+                        user.business.address.location.should.have.property('coordinates');
+                        user.business.address.location.coordinates[0].should.equal(storeUser.business.address.location.coordinates[0]);
+                        user.business.address.location.coordinates[1].should.equal(storeUser.business.address.location.coordinates[1]);
+
                         done();
                     });
             });
