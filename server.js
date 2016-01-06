@@ -1,9 +1,9 @@
-var express    = require('express');        // call express
-var app        = express();                 // define our app using express
-var bodyParser = require('body-parser');
-var logger = require('morgan');
-var mongoose   = require('mongoose');
-var config = require('./config');
+var express     = require('express');        // call express
+var app         = express();                 // define our app using express
+var bodyParser  = require('body-parser');
+var logger      = require('morgan');
+var mongoose    = require('mongoose');
+var config      = require('./config');
 
 // Connect to database specified in the config
 mongoose.connect(config.databaseURI[app.settings.env]);

@@ -1,8 +1,4 @@
-var mongoose     = require('mongoose');
-var Schema       = mongoose.Schema;
-
-var BookingSchema   = new Schema({
-    name: String
-});
+var mongoose        = require('mongoose');
+var BookingSchema   = require('./Schemas/bookingSchema');
 
 module.exports = mongoose.model('Booking', BookingSchema);

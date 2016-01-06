@@ -1,9 +1,12 @@
-var jwt = require('jwt-simple');
-var auth = require('../routes/auth');
-var config = require('../../config');
+var jwt     = require('jwt-simple');
+var auth    = require('../routes/auth');
+var config  = require('../../config');
 
-/*
-This module is a safe-guard for validating each request
+/**
+ * This module is a safe-guard for validating each request
+ * @param req
+ * @param res
+ * @param next
  */
 module.exports = function(req, res, next) {
 

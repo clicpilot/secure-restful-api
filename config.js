@@ -1,5 +1,4 @@
 module.exports = {
-
     'secret': 'thisIsTopSecret',
     'databaseURI' : {
         development: 'mongodb://localhost/api-test',
