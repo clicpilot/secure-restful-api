@@ -4,8 +4,7 @@
 var mongoose     = require('mongoose');
 var Schema       = mongoose.Schema;
 
-
-var UserProfileSchema   = new Schema({
+var UserProfileSchema = new Schema({
     firstname: { type: String, required: false },               // User firstname
     lastname: { type: String, required: false },                // User lastname
     phone: { type: String, required: false },                   // User personal phone

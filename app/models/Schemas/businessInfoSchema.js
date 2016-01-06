@@ -1,13 +1,11 @@
 /**
  * Created by hhtopcu on 30/12/15.
  */
-var mongoose     = require('mongoose');
-var Schema       = mongoose.Schema;
-
+var mongoose        = require('mongoose');
 var AddressSchema   = require('./addressSchema');
+var Schema          = mongoose.Schema;
 
-var BusinessInfoSchema   = new Schema({
-
+var BusinessInfoSchema = new Schema({
     storeName: { type: String, required: false },               // Official name of the Store
     bio: { type: String, required: false },                     // Store's bio
     photoUrl: { type: String, required: false },                // Amazon S3 relative url
@@ -17,4 +15,4 @@ var BusinessInfoSchema   = new Schema({
     address: AddressSchema
 });
 
-module.exports = BusinessInfoSchema
+module.exports = BusinessInfoSchema;

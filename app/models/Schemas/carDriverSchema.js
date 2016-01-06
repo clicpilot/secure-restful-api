@@ -4,8 +4,7 @@
 var mongoose     = require('mongoose');
 var Schema       = mongoose.Schema;
 
-var CarDriverSchema   = new Schema({
-
+var CarDriverSchema = new Schema({
     licenceNumber: { type: String, required: false },               // Official name of the Store
     licenceImageUrl: { type: String, required: false },             // Amazon S3 relative url
     licenceImageMd5: { type: String, required: false },             // Image MD5
