@@ -1,12 +1,14 @@
-var jwt = require('jwt-simple');
-var bcrypt = require('bcrypt');
-var config = require('../../config');
-var sendgrid  = require('sendgrid')
+var jwt         = require('jwt-simple');
+var bcrypt      = require('bcrypt');
+var config      = require('../../config');
+var sendgrid    = require('sendgrid')
+var User        = require('../models/user');
 
-var User = require('../models/user');
-
+/**
+ * Routers for authentication: /login, /register, /password
+ * @type {{login: auth.login, register: auth.register, forgot: auth.forgot, validateUser: auth.validateUser}}
+ */
 var auth = {
-
     /**
      * /login endpoint
      * @param req request having http body should have username and password
