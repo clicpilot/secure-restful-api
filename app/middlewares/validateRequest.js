@@ -2,83 +2,76 @@ var jwt = require('jwt-simple');
 var auth = require('../routes/auth');
 var config = require('../../config');
 
+/*
+This module is a safe-guard for validating each request
+ */
 module.exports = function(req, res, next) {
 
-    // When performing a cross domain request, you will recieve
-    // a preflighted request first. This is to check if our the app
-    // is safe.
-
-    // We skip the token outh for [OPTIONS] requests.
-    //if(req.method == 'OPTIONS') next();
-
+    // Get the access-token from the header
     var token = (req.body && req.body.access_token) || (req.query && req.query.access_token) || req.headers['x-access-token'];
 
     if (token) {
         try {
+            // Decode the previously encoded token using our secret key
             var decoded = jwt.decode(token, config.secret);
 
+            // Check whether it is expired or not
             if (decoded.exp <= Date.now()) {
-                res.status(400);
+                res.status(401);
                 res.json({
-                    "status": 400,
-                    "message": "Token Expired"
+                    "status": 401,
+                    "message": "Unauthorized: Token expired"
                 });
                 return;
             }
 
             // Authorize the user to see if s/he can access our resources
-            // The key would be the logged in user's username
-            auth.validateUser(decoded.username, function(err, user){
-                if(user){
-                    if ((req.url.indexOf('admin') >= 0 && dbUser.role == 'admin') || (req.url.indexOf('admin') < 0 && req.url.indexOf('/v1/') >= 0)) {
+            var username = decoded.username;
+            var userRole = decoded.role;
 
+            // Validate user
+            auth.validateUser(username, function(err, user){
+                if(user) {
+                    if ((req.url.indexOf('admin') >= 0 && userRole == 'admin') || (req.url.indexOf('admin') < 0 && req.url.indexOf('/v1/') >= 0)) {
                         // Pass user_id to subsequent calls
                         req.user_id = user._id;
-                        //req.businessId = user.businessId;
-                        //req.driverId = user.driverId;
-
-                        // To move to next middleware
+                        // move to next middleware
                         next();
-                    }
-                    else
-                    {
+
+                    } else {
                         res.status(403);
                         res.json({
                             "status": 403,
-                            "message": "Not Authorized"
+                            "message": "Forbidden: Not Authorized"
                         });
                         return;
                     }
-                }else{
-                    // No user with this name exists, respond back with a 401
+
+                } else {
+                    // No user with this username exists
                     res.status(401);
                     res.json({
                         "status": 401,
-                        "message": "Invalid User"
+                        "message": "Unauthorized: The user doen't exist"
                     });
                     return;
                 }
             });
 
-
         } catch (err) {
-
             res.status(403);
             res.json({
                 "status": 403,
-                "message": "Not Authorized"
+                "message": "Forbidden: Not Authorized"
             });
             return;
-
-            //res.status(500).sendFile(require('path').join(__dirname, 'static/500.html'));
-
-
         }
+
     } else {
-        res.status(401);
+        res.status(400);
         res.json({
-            "status": 401,
-            "message": "Bad Authentication data"
+            "status": 400,
+            "message": "Bad Request: No Access Token exist"
         });
         return;
     }

@@ -64,11 +64,11 @@ describe('Test Bookings', function() {
     beforeEach(function(done){
         done();
     });
+
     afterEach(function(done){
         Booking.collection.drop();
         done();
     });
-
 
     // it() statements contain each individual test case, which generally (err, should) test a single feature
     it('should give an authorization error /v1/bookings GET', function(done) {
@@ -77,7 +77,7 @@ describe('Test Bookings', function() {
             .get('/v1/bookings')
             .set('x-access-token', '')
             .end(function(err, res){
-                res.should.have.status(401);
+                res.should.have.status(400);
                 done();
             });
     });
