@@ -1,5 +1,4 @@
-var etag = require('etag')
-
+var etag        = require('etag')
 var Booking     = require('../models/booking');
 
 var routers = {

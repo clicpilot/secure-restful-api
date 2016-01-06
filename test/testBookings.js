@@ -1,32 +1,28 @@
 process.env.NODE_ENV = 'test';
 
-var chai = require('chai');
-var chaiHttp = require('chai-http');
-var server = require('../server');
-var should = chai.should();
-var jwt = require('jwt-simple');
-var bcrypt = require('bcrypt');
-var config = require('../config');
-var etag = require('etag')
-
-var Booking = require('../app/models/booking');
-var User = require('../app/models/user');
-
+var chai        = require('chai');
+var chaiHttp    = require('chai-http');
+var server      = require('../server');
+var jwt         = require('jwt-simple');
+var config      = require('../config');
+var etag        = require('etag')
+var Booking     = require('../app/models/booking');
+var User        = require('../app/models/user');
+var should      = chai.should();
 
 chai.use(chaiHttp);
 
-
-/* describe() is used for grouping tests in a logical manner. */
+/**
+ * Tests for bookings(requesting a driver)
+ */
+// TODO: This tests will be updated after changing Booking logic
 describe('Test Bookings', function() {
-
-
     /* This token will be used in all test cases*/
     var token;
 
-    before(function(done){
+    before(function(done) {
         Booking.collection.drop();
         User.collection.drop();
-
 
         var user = new User();
         var password = "12345.";
@@ -34,12 +30,12 @@ describe('Test Bookings', function() {
         user.role = "admin";
         user.password = "A1234.";
 
-
         user.save(function(err,user) {
+            if(err) {
+                return(next(err));
+            }
 
-            if(err) { return(next(err)); }
-
-            var days = 7;
+            var days = config.dayForTokenExpiration;
             var dateObj = new Date();
             var expires= dateObj.setDate(dateObj.getDate() + days);
 
@@ -48,31 +44,30 @@ describe('Test Bookings', function() {
                 exp: expires,
                 username: user.username,
                 userId: user._id,
+                role: user.role
             }, config.secret);
-
 
             done();
         });
     });
 
-    after(function(done){
+    after(function(done) {
         Booking.collection.drop();
         User.collection.drop();
         done();
     });
 
-    beforeEach(function(done){
+    beforeEach(function(done) {
         done();
     });
 
-    afterEach(function(done){
+    afterEach(function(done) {
         Booking.collection.drop();
         done();
     });
 
     // it() statements contain each individual test case, which generally (err, should) test a single feature
     it('should give an authorization error /v1/bookings GET', function(done) {
-
         chai.request(server)
             .get('/v1/bookings')
             .set('x-access-token', '')
@@ -84,11 +79,10 @@ describe('Test Bookings', function() {
 
     // it() statements contain each individual test case, which generally (err, should) test a single feature
     it('should give an authorization error /v1/bookings GET', function(done) {
-
         chai.request(server)
             .get('/v1/bookings')
             .set('x-access-token', 'Non empty but wrong access token')
-            .end(function(err, res){
+            .end(function(err, res) {
                 res.should.have.status(403);
                 done();
             });
@@ -96,11 +90,10 @@ describe('Test Bookings', function() {
 
     // it() statements contain each individual test case, which generally (err, should) test a single feature
     it('should list ALL bookings on /v1/bookings GET', function(done) {
-
         chai.request(server)
             .get('/v1/bookings')
             .set('x-access-token', token)
-            .end(function(err, res){
+            .end(function(err, res) {
                 res.should.have.status(200);
                 res.should.be.json;
                 res.body.should.be.a('array');
@@ -114,7 +107,7 @@ describe('Test Bookings', function() {
             .post('/v1/bookings')
             .send({name: "This is a test booking"})
             .set('x-access-token', token)
-            .end(function(err, res){
+            .end(function(err, res) {
                 res.should.have.status(201);
                 res.should.be.json;
                 res.body.should.be.a('object');
@@ -132,7 +125,7 @@ describe('Test Bookings', function() {
             chai.request(server)
                 .get('/v1/booking/'+ data.id)
                 .set('x-access-token', token)
-                .end(function(err, res){
+                .end(function(err, res) {
                     res.should.have.status(200);
                     res.should.be.json;
                     res.body.should.be.a('object');
@@ -143,9 +136,7 @@ describe('Test Bookings', function() {
                     done();
                 });
         });
-
     });
-
 
     it('should update a SINGLE booking on /booking/:id PUT', function(done){
         var newBooking = new Booking({
@@ -157,14 +148,12 @@ describe('Test Bookings', function() {
                 .put('/v1/booking/'+ data.id)
                 .send({name : "Updated Booking"})
                 .set('x-access-token', token)
-                .end(function(err, res){
+                .end(function(err, res) {
                     res.should.have.status(201);
                     done();
                 });
         });
-
     });
-
 
     it('should delete a SINGLE booking on /booking/:id DELETE', function(done){
         var newBooking = new Booking({
@@ -175,14 +164,13 @@ describe('Test Bookings', function() {
             chai.request(server)
                 .delete('/v1/booking/'+ data.id)
                 .set('x-access-token', token)
-                .end(function(err, res){
+                .end(function(err, res) {
                     res.should.have.status(204);
                     done();
                 });
         });
 
     });
-
 
     /* Wrong etag */
     it('should get a non-cached booking on /booking/:id GET', function(done){
@@ -195,7 +183,7 @@ describe('Test Bookings', function() {
                 .get('/v1/booking/'+ data.id)
                 .set('x-access-token', token)
                 .set('if-none-match', 'etag-no-match')
-                .end(function(err, res){
+                .end(function(err, res) {
                     res.should.have.status(200);
                     res.should.be.json;
                     res.body.should.be.a('object');
@@ -206,7 +194,6 @@ describe('Test Bookings', function() {
                     done();
                 });
         });
-
     });
 
     /* Correct etag */
@@ -216,21 +203,17 @@ describe('Test Bookings', function() {
         });
 
         newBooking.save(function(err, data) {
-
             //var tag = etag(JSON.stringify(data));
             var tag = etag(data._id + ";" + data.name);
             chai.request(server)
                 .get('/v1/booking/'+ data.id)
                 .set('x-access-token', token)
                 .set('if-none-match', tag)
-                .end(function(err, res){
+                .end(function(err, res) {
                     res.should.have.status(304);
 
                     done();
                 });
         });
-
     });
-
-
 });

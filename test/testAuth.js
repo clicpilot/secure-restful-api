@@ -1,33 +1,32 @@
 process.env.NODE_ENV = 'test';
 
-var chai = require('chai');
-var chaiHttp = require('chai-http');
-var bcrypt = require('bcrypt');
-var server = require('../server');
-var should = chai.should();
-var config = require('../config');
-var jwt = require('jwt-simple');
+var chai        = require('chai');
+var chaiHttp    = require('chai-http');
+var bcrypt      = require('bcrypt');
+var server      = require('../server');
+var config      = require('../config');
+var jwt         = require('jwt-simple');
+var User        = require('../app/models/user');
+var Address     = require('../app/models/address');
+var should      = chai.should();
 
 chai.use(chaiHttp);
 
-var User = require('../app/models/user');
-var Address = require('../app/models/address');
-
-/* describe() is used for grouping tests in a logical manner. */
+/**
+ * Tests for Authentication
+ */
 describe('Test Auth', function() {
-
     var storeUser;
     var driverUser;
     var password = "12345.";
 
-    before(function(done){
-
+    before(function(done) {
         Address.collection.drop();
         User.collection.drop();
         done();
     });
 
-    beforeEach(function(done){
+    beforeEach(function(done) {
         // Create Model
         storeUser = new User();
         storeUser.username = "hhtopcu@gmail.com";
@@ -92,7 +91,7 @@ describe('Test Auth', function() {
 
     });
 
-    afterEach(function(done){
+    afterEach(function(done) {
         // After each test method, drop User collection
         Address.collection.drop();
         User.collection.drop();
@@ -100,21 +99,17 @@ describe('Test Auth', function() {
         done();
     });
 
-
     it('should give an error for a store user without business info', function(done) {
-
         var aStoreWithoutBusinessDetails = new User();
         aStoreWithoutBusinessDetails.username = storeUser.username;
         aStoreWithoutBusinessDetails.password = storeUser.password;
         aStoreWithoutBusinessDetails.role = storeUser.role;
         aStoreWithoutBusinessDetails.profile = storeUser.profile;
 
-
         chai.request(server)
             .post('/register')
             .send(aStoreWithoutBusinessDetails)
             .end(function (err, res) {
-
                 // should register successfully
                 res.should.have.status(404);
 
@@ -123,12 +118,10 @@ describe('Test Auth', function() {
     });
 
     it('should register a store user with business info', function(done) {
-
         chai.request(server)
             .post('/register')
             .send(storeUser)
             .end(function (err, res) {
-
                 // should register successfully
                 res.should.have.status(201);
 
@@ -145,14 +138,11 @@ describe('Test Auth', function() {
                         user.profile.email.should.equal(storeUser.profile.email);
                         user.profile.photoUrl.should.equal(storeUser.profile.photoUrl);
                         user.profile.photoMd5.should.equal(storeUser.profile.photoMd5);
-
                         user.business.storeName.should.equal(storeUser.business.storeName);
                         user.business.bio.should.equal(storeUser.business.bio);
                         user.business.photoUrl.should.equal(storeUser.business.photoUrl);
                         user.business.phone.should.equal(storeUser.business.phone);
                         user.business.email.should.equal(storeUser.business.email);
-
-
                         user.business.should.have.property('address');
                         user.business.address.should.have.property('street');
                         user.business.address.should.have.property('city');
@@ -160,12 +150,10 @@ describe('Test Auth', function() {
                         user.business.address.should.have.property('zip');
                         user.business.address.should.have.property('location');
                         user.business.address.should.have.property('createdDate');
-
                         user.business.address.street.should.equal(storeUser.business.address.street);
                         user.business.address.city.should.equal(storeUser.business.address.city);
                         user.business.address.country.should.equal(storeUser.business.address.country);
                         user.business.address.zip.should.equal(storeUser.business.address.zip);
-
                         user.business.address.location.should.have.property('type');
                         user.business.address.location.should.have.property('coordinates');
                         user.business.address.location.coordinates[0].should.equal(storeUser.business.address.location.coordinates[0]);
@@ -177,7 +165,6 @@ describe('Test Auth', function() {
     });
 
     it('should give an error for a driver user without car & driver details', function(done) {
-
         var aDriverWithoutDriverDetails = new User();
         aDriverWithoutDriverDetails.username = driverUser.username;
         aDriverWithoutDriverDetails.password = driverUser.password;
@@ -188,7 +175,6 @@ describe('Test Auth', function() {
             .post('/register')
             .send(aDriverWithoutDriverDetails)
             .end(function (err, res) {
-
                 // should register successfully
                 res.should.have.status(404);
 
@@ -197,12 +183,10 @@ describe('Test Auth', function() {
     });
 
     it('should register a driver user with car & driver details', function(done) {
-
         chai.request(server)
             .post('/register')
             .send(driverUser)
             .end(function (err, res) {
-
                 // should register successfully
                 res.should.have.status(201);
 
@@ -219,7 +203,6 @@ describe('Test Auth', function() {
                         user.profile.email.should.equal(driverUser.profile.email);
                         user.profile.photoUrl.should.equal(driverUser.profile.photoUrl);
                         user.profile.photoMd5.should.equal(driverUser.profile.photoMd5);
-
                         user.carDriver.licenceNumber.should.equal(driverUser.carDriver.licenceNumber);
                         user.carDriver.licenceImageUrl.should.equal(driverUser.carDriver.licenceImageUrl);
                         user.carDriver.licenceImageMd5.should.equal(driverUser.carDriver.licenceImageMd5);
@@ -232,18 +215,14 @@ describe('Test Auth', function() {
             });
     });
 
-
-
     it('should give an user already exist error /register', function(done) {
         // First create the user
         storeUser.save(function (err, user) {
-
             // Again try to register the current user. should give conflict
             chai.request(server)
                 .post('/register')
                 .send(user)
                 .end(function (err, res) {
-
                     // Conflict - User already exist
                     res.should.have.status(409);
 
@@ -252,9 +231,7 @@ describe('Test Auth', function() {
         });
     });
 
-
     it('should give an user/password empty error /register', function(done) {
-
         var user = new User();
         user.username = '';
         user.password = '';
@@ -263,7 +240,7 @@ describe('Test Auth', function() {
         chai.request(server)
             .post('/register')
             .send(user)
-            .end(function(err, res){
+            .end(function(err, res) {
                 // Invalid cridentials
                 res.should.have.status(401);
 
@@ -271,14 +248,11 @@ describe('Test Auth', function() {
             });
     });
 
-
-
     it('should give an user/password empty error /login', function(done) {
-
         chai.request(server)
             .post('/login')
             .send({username: '', password: ''})
-            .end(function(err, res){
+            .end(function(err, res) {
                 // Invalid cridentials
                 res.should.have.status(401);
 
@@ -286,14 +260,11 @@ describe('Test Auth', function() {
             });
     });
 
-
-
     it('should give an invalid credentials error /login', function(done) {
-
         chai.request(server)
             .post('/login')
             .send({'username': 'nosuchuser@nosuchuser.com', 'password': 'nosuchuser'})
-            .end(function(err, res){
+            .end(function(err, res) {
                 // Invalid cridentials
                 res.should.have.status(401);
 
@@ -301,9 +272,7 @@ describe('Test Auth', function() {
             });
     });
 
-
     it('should send token on valid store login', function(done) {
-
         // Save the user
         storeUser.save(function(err,user) {
 
@@ -313,19 +282,16 @@ describe('Test Auth', function() {
                 .end(function(err, res) {
 
                     res.should.have.status(200);
-
                     res.body.should.be.a('object');
                     res.body.should.have.property('token');
                     res.body.should.have.property('expires');
                     res.body.should.have.property('username');
                     res.body.should.have.property('role');
-
                     res.body.username.should.equal(user.username);
                     res.body.role.should.equal(user.role);
 
                     // Decode the token generated by jwt
                     var decoded = jwt.decode(res.body.token, config.secret);
-
                     decoded.should.have.property('userId');
                     decoded.should.have.property('username');
                     decoded.should.have.property('exp');
@@ -340,10 +306,8 @@ describe('Test Auth', function() {
     });
 
     it('should send an email on /forgot', function(done) {
-
         // First create the user
         storeUser.save(function (err, user) {
-
             chai.request(server)
                 .post('/forgot')
                 .send({username: 'hhtopcu@gmail.com'})
@@ -357,11 +321,10 @@ describe('Test Auth', function() {
     });
 
     it('should send an invalid error on /forgot', function(done) {
-
         chai.request(server)
             .post('/forgot')
             .send({username: ''})
-            .end(function(err, res){
+            .end(function(err, res) {
                 // Invalid credentials
                 res.should.have.status(401);
 
@@ -370,16 +333,14 @@ describe('Test Auth', function() {
     });
 
     it('should send an not found error on /forgot', function(done) {
-
         chai.request(server)
             .post('/forgot')
             .send({username: 'nonosuchuser@gmail.com'})
-            .end(function(err, res){
+            .end(function(err, res) {
                 // Invalid credentials
                 res.should.have.status(404);
 
                 done();
             });
     });
-
 });
