@@ -95,7 +95,7 @@ describe('Test Car&Driver Info', function() {
             .end(function(err, res){
 
                 (err === null).should.be.true;
-                res.should.have.status(404);
+                res.should.have.status(500);
                 done();
             });
     });

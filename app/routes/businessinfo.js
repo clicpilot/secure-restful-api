@@ -5,7 +5,7 @@ var mongoose    = require('mongoose');
 var User        = require('../models/user');
 
 /**
- * Routers for business info GET and PUT
+ * Routers for Business Info GET and PUT
  * @type {{getOne: routers.getOne, update: routers.update}}
  */
 var routers = {
@@ -48,7 +48,7 @@ var routers = {
     },
 
     /**
-     * Update an existing business info
+     * Update an existing Business Info
      * @param req request having business info ID
      * @param res response having only the resulting http status code
      */

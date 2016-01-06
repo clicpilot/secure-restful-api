@@ -1,6 +1,10 @@
 var etag        = require('etag')
 var Booking     = require('../models/booking');
 
+/**
+ *
+ * @type {{getAll: routers.getAll, getOne: routers.getOne, create: routers.create, update: routers.update, delete: routers.delete}}
+ */
 var routers = {
 
     /* Get all bookings */
