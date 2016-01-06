@@ -8,6 +8,7 @@ var config      = require('../config');
 var etag        = require('etag')
 var Booking     = require('../app/models/booking');
 var User        = require('../app/models/user');
+var Address     = require('../app/models/address');
 var should      = chai.should();
 
 chai.use(chaiHttp);
@@ -22,7 +23,6 @@ describe('Test Bookings', function() {
 
     before(function(done) {
         Booking.collection.drop();
-        User.collection.drop();
 
         var user = new User();
         var password = "12345.";
@@ -53,7 +53,9 @@ describe('Test Bookings', function() {
 
     after(function(done) {
         Booking.collection.drop();
+        Address.collection.drop();
         User.collection.drop();
+
         done();
     });
 
@@ -63,6 +65,7 @@ describe('Test Bookings', function() {
 
     afterEach(function(done) {
         Booking.collection.drop();
+
         done();
     });
 
@@ -203,7 +206,9 @@ describe('Test Bookings', function() {
         });
 
         newBooking.save(function(err, data) {
-            //var tag = etag(JSON.stringify(data));
+            (err === null).should.be.true;
+            (data != null).should.be.true;
+
             var tag = etag(data._id + ";" + data.name);
             chai.request(server)
                 .get('/v1/booking/'+ data.id)
