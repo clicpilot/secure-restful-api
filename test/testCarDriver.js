@@ -11,6 +11,7 @@ var bcrypt      = require('bcrypt');
 var config      = require('../config');
 var User        = require('../app/models/user');
 var Address     = require('../app/models/address');
+var mongoose    = require('mongoose');
 var should      = chai.should();
 
 chai.use(chaiHttp);
@@ -20,6 +21,7 @@ describe('Test Car&Driver Info', function() {
 
     var mToken;
     var mUser;
+    var mMongoObjectID = '4eb6e7e7e9b7f4194e000002';
 
     before(function(done) {
         // After each test method, drop User collection
@@ -30,6 +32,8 @@ describe('Test Car&Driver Info', function() {
     });
 
     beforeEach(function(done) {
+        var id = mongoose.Types.ObjectId(mMongoObjectID);
+
         var driverUser = new User();
         driverUser.username = "atopcu@gmail.com";
         driverUser.password = "atopcu";
@@ -44,6 +48,7 @@ describe('Test Car&Driver Info', function() {
         };
 
         driverUser.carDriver = {
+            _id : id,
             licenceNumber: "A12345678",
             licenceImageUrl: "/My/Photo/Url/On/Aws",
             licenceImageMd5: "4abcdefghijklm",
@@ -102,7 +107,7 @@ describe('Test Car&Driver Info', function() {
 
     it('should get a single car&detail', function(done) {
         chai.request(server)
-            .get('/v1/cardriver/'+ mUser.carDriver.id)
+            .get('/v1/cardriver/'+ mMongoObjectID)
             .set('x-access-token', mToken)
             .end(function(err, res) {
                 res.should.have.status(200);
@@ -132,7 +137,7 @@ describe('Test Car&Driver Info', function() {
 
         // Send request
         chai.request(server)
-            .put('/v1/cardriver/'+ mUser.carDriver.id)
+            .put('/v1/cardriver/'+ mMongoObjectID)
             .set('x-access-token', mToken)
             .send({carDriver: updated})
             .end(function(err, res) {
@@ -141,7 +146,7 @@ describe('Test Car&Driver Info', function() {
                 res.should.have.status(201);
 
                 // Find the business info about the user
-                User.findOne({'carDriver._id': mUser.carDriver.id})
+                User.findOne({'carDriver._id': mMongoObjectID})
                     .select('carDriver')
                     .exec(function (err, user) {
 

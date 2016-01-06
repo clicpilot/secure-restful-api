@@ -15,18 +15,12 @@ var routers = {
      * @param res response having a single instance of Business Info
      */
     getOne: function(req, res) {
-
-        console.log("Passed BI id: " + req.params.id)
         // Check if id of business info passed with the request valid for MongoDB or not
         var isIdValid = mongoose.Types.ObjectId.isValid(req.params.id);
-
-        console.log("Passed BI id: " + req.params.id + " is Valid: " + isIdValid)
 
         if (isIdValid) {
             // Convert string typed id to ObjectId compatible with MongoDB
             var id = mongoose.Types.ObjectId(req.params.id);
-
-            console.log("ID is converted to ObjectID")
 
             // Find the user by user id
             User.findOne({'business._id': id})
