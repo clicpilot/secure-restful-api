@@ -15,7 +15,6 @@ var routers = {
      * @param res response having a single instance of Business Info
      */
     getOne: function(req, res) {
-
         // Check if id of business info passed with the request valid for MongoDB or not
         var isIdValid = mongoose.Types.ObjectId.isValid(req.params.id);
 
@@ -27,7 +26,6 @@ var routers = {
             User.findOne({'business._id': id})
                 .select('business')
                 .exec(function (err, data) {
-
                     if (err || !data) {
                         res.status(500).json({
                             "status": 500,

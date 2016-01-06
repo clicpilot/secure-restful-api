@@ -12,6 +12,7 @@ var bcrypt      = require('bcrypt');
 var config      = require('../config');
 var User        = require('../app/models/user');
 var Address     = require('../app/models/address');
+var mongoose    = require('mongoose');
 
 chai.use(chaiHttp);
 
@@ -19,8 +20,10 @@ chai.use(chaiHttp);
  * Tests for Business Info
  */
 describe('Test Business Info', function() {
-    var mToken;
     var mUser;
+    var mToken;
+    var password = "Aa123456";
+    var mMongoObjectID = '4eb6e7e7e9b7f4194e000002';
 
     before(function(done) {
         // After each test method, drop User collection
@@ -31,9 +34,10 @@ describe('Test Business Info', function() {
     });
 
     beforeEach(function(done) {
+        var id = mongoose.Types.ObjectId(mMongoObjectID);
+
         var storeUser = new User();
         storeUser.username = "hhtopcu@gmail.com";
-        storeUser.password = "123456";
         storeUser.role = "store";
         storeUser.profile = {
             firstname: "Hasan",
@@ -46,6 +50,7 @@ describe('Test Business Info', function() {
 
         // business information
         storeUser.business = {
+            _id: id,
             storeName: "Kinetica",
             bio: "Creative Mobile Development Agency",
             photoUrl: "/My/Photo/Url/On/Aws",
@@ -64,13 +69,13 @@ describe('Test Business Info', function() {
             }
         };
 
-        bcrypt.hash(storeUser.password, 10, function (err, hash) {
+        bcrypt.hash(password, 10, function (err, hash) {
             storeUser.password = hash;
 
             // Save the user
             storeUser.save(function(err,user) {
                 if(!err) {
-                    var days = 7;
+                    var days = config.dayForTokenExpiration;
                     var dateObj = new Date();
                     var expires = dateObj.setDate(dateObj.getDate() + days);
 
@@ -89,6 +94,7 @@ describe('Test Business Info', function() {
                 } else {
                     console.log(err);
                 }
+
             });
         });
     });
@@ -102,6 +108,7 @@ describe('Test Business Info', function() {
     });
 
     it('should get a not found error for business info /businessinfo/:id /GET', function(done) {
+
         chai.request(server)
             .get('/v1/businessinfo/'+ '4eb6e7e7e9b7f4194e000001')
             .set('x-access-token', mToken)
@@ -111,11 +118,13 @@ describe('Test Business Info', function() {
                 res.should.have.status(500);
                 done();
             });
+
     });
 
     it('should get a single business info /businessinfo/:id /GET', function(done) {
+
         chai.request(server)
-            .get('/v1/businessinfo/'+ mUser.business.id)
+            .get('/v1/businessinfo/'+ mMongoObjectID)
             .set('x-access-token', mToken)
             .end(function(err, res) {
                 res.should.have.status(200);
@@ -145,6 +154,7 @@ describe('Test Business Info', function() {
 
                 done();
             });
+
     });
 
     it('should update a single business info /businessinfo/:id /PUT', function(done) {
@@ -169,15 +179,16 @@ describe('Test Business Info', function() {
 
         // Send request
         chai.request(server)
-            .put('/v1/businessinfo/'+ mUser.business.id)
+            .put('/v1/businessinfo/'+ mMongoObjectID)
             .set('x-access-token', mToken)
             .send({business: updated})
             .end(function(err, res) {
+
                 (err === null).should.be.true;
                 res.should.have.status(201);
 
                 // Find the business info about the user
-                User.findOne({'business._id': mUser.business.id})
+                User.findOne({'business._id': mMongoObjectID})
                     .select('business')
                     .exec(function (err, user) {
                         (err === null).should.be.true;
@@ -210,4 +221,5 @@ describe('Test Business Info', function() {
                     });
             });
     });
+
 });
