@@ -12,7 +12,7 @@ This is a template project equipped with
 
 ## Run the server
 
-To run locally, you should first install node modules by
+To run locally, you should first install the node modules by
 
 > npm install
 
@@ -23,7 +23,7 @@ After installing modules, start API in local environment by
 
 ## Testing
 
-These tests are integration tests.
+These tests are the integration tests.
 
 You should install mocha globally first
 
